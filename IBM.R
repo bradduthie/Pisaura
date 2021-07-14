@@ -134,8 +134,8 @@ reproduce <- function(inds){
   male_w   <- males[, 3] / sum(males[, 3]);
   
   cols     <- dim(inds)[2]
-  N_f      <- dim(females)[1];
-  N_m      <- dim(males)[1];
+  N_f      <- floor(0.5 * cols);
+  N_m      <- cols - N_f;
   
   off_F    <- sample(x = 1:N_f, size = N_f, replace = TRUE, prob = female_w);
   off_M    <- sample(x = 1:N_m, size = N_m, replace = TRUE, prob = male_w);
