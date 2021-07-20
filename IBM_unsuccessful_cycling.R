@@ -12,21 +12,19 @@ Pam  <- 2; # Payoff to male for no gift to mated female
 Pfm  <- 1; # Payoff to male for worthless gift to mated female
 Pgm  <- 0; # Payoff to male for geniune gift to mated female
 
-# Fix population size
-# Start with resident no nuptual gift
-# Input Ander's parameter values
+
 make_inds <- function(N = 100, Qav = 1, Qfv = 1, Qgv = 2, Qam = 1, Qfm = 1, 
                       Qgm = 1, Pav = 2, Pfv = 1, Pgv = 1, Pam = 1, Pfm = 1, 
                       Pgm = 1){
   
   inds     <- matrix(data = 0, nrow = N, ncol = 19);
-  as_raw   <- 1.0;
-  fs_raw   <- 0.0;
-  gs_raw   <- 0.0;
+  as_raw   <- runif(n = N, min = 0, max = 1);
+  fs_raw   <- runif(n = N, min = 0, max = 1);
+  gs_raw   <- runif(n = N, min = 0, max = 1);
   sums     <- as_raw + fs_raw + gs_raw;
-  as       <- 1;
-  fs       <- 0;
-  gs       <- 0;
+  as       <- as_raw / sums;
+  fs       <- fs_raw / sums;
+  gs       <- gs_raw / sums;
   
   inds[, 1]  <- c(rep(0, 0.5*N), rep(1, 0.5*N));
   inds[, 2]  <- 0;
@@ -139,11 +137,12 @@ reproduce <- function(inds){
   male_w   <- males[, 3] / sum(males[, 3]);
   
   N        <- dim(inds)[1];
+  New_N    <- floor(sum(females[, 3])); # Aug. with female payoffs
   cols     <- dim(inds)[2];
   N_af     <- dim(females)[1];
   N_am     <- dim(males)[1];
-  N_f      <- floor(0.5 * N);
-  N_m      <- N - N_f;
+  N_f      <- floor(0.5 * New_N);
+  N_m      <- New_N - N_f;
   
   off_F    <- sample(x = 1:N_af, size = N_f, replace = TRUE, prob = female_w);
   off_M    <- sample(x = 1:N_am, size = N_m, replace = TRUE, prob = male_w);
@@ -212,38 +211,10 @@ run_sim <- function(N = 1000, gens = 2000, print_gen = TRUE, Qav = 1, Qfv = 1,
 }
 
 
-
-# Need to set costs
-c2 <- runif(1,0,1);
-c1 <- runif(1,0,c2);
-c3 <- runif(1,0,c2);
-
-# Adding in empirical parameter values
-P_av <- 0.3276 - c3;
-P_fv <- 0.8966 - c2;
-P_gv <- 1.0000 - c1;
-P_am <- 0.0000 - c3;
-P_fm <- 0.8966 - c2;
-P_gm <- 1.0000 - c1;
-
-# Need to set b values for females
-b2 <- runif(1,0,1);
-b1 <- runif(1,0,b2);
-b3 <- runif(1,0,b2);
-
-# Adding in empirical parameter values
-Q_av <- 0.477 + b3;
-Q_fv <- 0.477 + b2;
-Q_gv <- 1.000 + b2;
-Q_am <- 0.477 + b3;
-Q_fm <- 0.477 + b2;
-Q_gm <- 1.000 + b1;
-
 replicate_sims <- function(N = 1000, gens = 200, print_end = TRUE, reps = 10,
-                           Qav = Q_av, Qfv = Q_fv, Qgv = Q_gv, Qam = Q_am, 
-                           Qfm = Q_fm, Qgm = Q_gm, Pav = P_av, Pfv = P_fv, 
-                           Pgv = P_gv, Pam = P_am, Pfm = P_fm, Pgm = P_gm, 
-                           encounter_rate = 200, print_gen = FALSE){
+                           Qav = 2, Qfv = 2, Qgv = 3, Qam = 0, Qfm = 0, 
+                           Qgm = 1, Pav = 1, Pfv = 2, Pgv = 4, Pam = 3, Pfm = 2, 
+                           Pgm = 0, encounter_rate = 200, print_gen = FALSE){
   
   rep_results <- NULL;
   for(i in 1:reps){
@@ -260,7 +231,7 @@ replicate_sims <- function(N = 1000, gens = 200, print_end = TRUE, reps = 10,
 
 sims <- NULL;
 for(i in 1:20){
-  sims[[i]] <- replicate_sims(gens = 240, reps = 1, 
+  sims[[i]] <- test_sim <- replicate_sims(gens = 240, reps = 1, 
                                           encounter_rate = "N", 
                                           print_gen = TRUE);
 }
