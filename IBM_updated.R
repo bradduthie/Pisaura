@@ -244,12 +244,21 @@ replicate_sims <- function(N = 1000, gens = 200, print_end = TRUE, reps = 10,
                            Q_am = 0.477, Q_fm = 0.477, Q_gm = 1.000, 
                            P_av = 0.3276, P_fv = 0.8966, P_gv = 1.0000, 
                            P_am = 0.0000, P_fm = 0.8966, P_gm = 1.0, 
-                           encounter_rate = 200, print_gen = FALSE){
+                           erl = 10, eru = 400, print_gen = FALSE, 
+                           res_file = "results/results.csv", 
+                           filegen = "results/gens"){
   
   rep_params  <- NULL;
   rep_results <- NULL;
+  csv_head    <- c("sim,", "N,", "gens,", "Qav,", "Qfv,", "Qgv,", "Qam,", 
+                   "Qfm,", "Qgm,", "Pav,", "Pfv,", "Pgv,", "Pam,", "Pfm,", 
+                   "Pgm,", "gen,", "F_a,", "F_f,", "F_g", "N \n");
+  cat(csv_head, file = res_file);
+  
   for(i in 1:reps){
       
+      encounter_rate  <- sample(x = erl:eru, size = 1);
+    
       c2 <- runif(1,0,1);
       c1 <- runif(1,0,c2);
       c3 <- runif(1,0,c2);
@@ -277,9 +286,13 @@ replicate_sims <- function(N = 1000, gens = 200, print_end = TRUE, reps = 10,
       sim_res          <- run_sim(N = N, gens = gens, print_gen = print_gen, 
                                   Qav, Qfv, Qgv, Qam, Qfm, Qgm, Pav, Pfv, Pgv, 
                                   Pam, Pfm, Pgm , encounter_rate);
-      rep_params[[i]]  <- parameters;
-      rep_results[[i]] <- sim_res;
+      end_results      <- c(i, parameters, sim_res[gens, ]);
       
+      cat(end_results, file = res_file, append = TRUE, sep = ",");
+      cat("\n", file = res_file, append = TRUE);
+      
+      sim_res_file <- paste(filegen, i, ".csv", sep = "");
+      write.csv(sim_res, file = sim_res_file, row.names = FALSE);
       if(print_end == TRUE){
         print(sim_res[gens, ]);
       }
@@ -288,26 +301,25 @@ replicate_sims <- function(N = 1000, gens = 200, print_end = TRUE, reps = 10,
   return(all_results);
 }
 
-GEN  <- 2400;
-REP  <- 200;
-sims <- replicate_sims(gens = GEN, reps = REP, encounter_rate = "N", 
-                       print_gen = TRUE);
+GEN  <- 12000;
+REP  <- 1000;
+sims <- replicate_sims(gens = GEN, reps = REP, print_gen = TRUE);
 
 
 # See how far everything has moved
-chg <- matrix(data = 0, nrow = REP, ncol = 5);
-for(i in 1:REP){
-    chg[i,] <- sims[[2]][[i]][GEN,];
-}
+# chg <- matrix(data = 0, nrow = REP, ncol = 5);
+# for(i in 1:REP){
+#    chg[i,] <- sims[[2]][[i]][GEN,];
+#}
 
 # Plot the change
-for(i in 1:REP){
-    file <- paste("notebook/img/sim_", i, ".png", sep = "");
-    png(filename = file)
-    sim <- sims[[2]][[i]];
-    plot(sim[,1], sim[,2], type = "l", lwd = 2, col = "black", ylim = c(0, 1));
-    points(sim[,1], sim[,3], type = "l", lwd = 2, col = "red");
-    points(sim[,1], sim[,4], type = "l", lwd = 2, col = "blue");
-    dev.off();
-}
+#for(i in 1:REP){
+#    file <- paste("notebook/img/sim_", i, ".png", sep = "");
+#    png(filename = file)
+#    sim <- sims[[2]][[i]];
+#    plot(sim[,1], sim[,2], type = "l", lwd = 2, col = "black", ylim = c(0, 1));
+#    points(sim[,1], sim[,3], type = "l", lwd = 2, col = "red");
+#    points(sim[,1], sim[,4], type = "l", lwd = 2, col = "blue");
+#    dev.off();
+#}
 
