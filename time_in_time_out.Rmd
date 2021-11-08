@@ -1,0 +1,71 @@
+---
+title: "A time-in time-out model"
+author: "Brad Duthie"
+date: "14/10/2021"
+output: pdf_document
+---
+
+
+Model
+================================
+
+We use a time-in and time-out model in which females and males spend some period of time searching for a mate (time-in) followed by a period of cool down outside the mating pool (time-out).
+
+After mating, we assume that females must spend some time processing offspring ($T_{f}$). Males must spend time out of the mating pool to replenish sperm and search for (fake or real) nuptial gifts. When males return from time out, they encounter females with some probability that is a function of the encounter rate between opposite sex conspecifics ($m$) and the sex ratio ($\beta$; males:females). Mortality occurs for females in ($\mu_{if}$) and out ($\mu_{of}$) of the mating pool, and for males in ($\mu_{im}$) and out ($\mu_{om}$) of the mating pool.
+
+Female fitness
+----------------------------
+
+During time-out, females process offspring over a duration of $T_{f}$. When females then re-enter the mating pool, they will then encounter males at a rate of $m\sqrt{\beta}$. We assume that female offspring receive a fitness increment of $\gamma \geq 0$ from males that provide a true nuptial gift. Female fitness therefore never decreases by mating with a male with a nuptial gift versus a male without one. Therefore, if a female encounters a male with a nuptial gift, we assume that she will mate with him. But if a female encounters a male with no nuptial gift, then she might accept or reject the male. If she rejects the male, then she will remain in the mating pool. We assume that females cannot distinguish between true and fake nuptial gifts.
+
+We model the probability that a female encounters a male with a nuptial gift (real or fake) after a duration of $T_{N}$ in the mating pool as,
+
+$$\Pr(g) = 1 - e^{-T_{N}\left( m \sqrt{\beta}\right) \left( \Pr(G) + \Pr(F) \right)}.$$
+
+In the above, $\Pr(G)$ and $\Pr(F)$ are the probabilities that males within the mating pool have successfully obtained a true or fake nuptial gift, respectively (see below). We can similarly model the probability that a female encounters a giftless male after $T_{N}$ as,
+
+$$\Pr(n) = 1 - e^{-T_{N} (m \sqrt{\beta}) \Pr(L)}.$$
+
+Note that $\Pr(g)$ and $\Pr(n)$ need not sum to unity, and if $\Pr(L)$ is sufficiently low, then finding a male with a gift will be easier than finding a male without one (i.e., $\Pr(g) > \Pr(n)$).
+
+For simplicity, we assume that offspring sired by a giftless male have a fitness of $1$, so offspring sired by males providing gifts have a fitness of $1 + \gamma$. The inclusive fitness of a female whose offspring are sired by a giftless male is therefore $W_{f}(n) = \kappa (1/2)$, where $\kappa$ is total number of offspring. For simply, we assume $\kappa = 1$, meaning that female fitness is $W_{f}(n) = 1/2$. The inclusive fitness of a female whose offspring are sired by a male with a gift is then,
+
+$$W_{f}(g) = \frac{1}{2}\left(1 + \gamma\frac{\Pr(G)}{\Pr(G) + \Pr(F)}\right).$$
+That is, the fitness increment $\gamma$ multiplied by the probability that a male's gift is true.
+
+We can now ask a relevant question for female fitness. Under what conditions should she reject a giftless male? Females will have a higher fitness when they reject a giftless male if $W_{f}(g)$ exceeds $W_{f}(n)$ after accounting for the opportunity cost associated with the additional search time spent in the mating pool $T_{N}$,
+
+$$\Pr(g)\frac{W_{f}(g)}{T_{F} + T_{N}} > \frac{W_{f}(n)}{T_{F}}.$$
+
+Verbally, the probability that a female finds a male with a gift that produces higher fitness offspring -- note, we might need to account for the fitness loss of not finding a new male? It might make sense to define a variable that is the time it takes to find a male with a gift (expected time). This shouldn't be too difficult.
+
+
+Male fitness
+----------------------------
+
+
+During time-out, males search for a nuptial gift for a time period of $T_{m}$. The probability that a male obtains a true nuptial gift ($G$) during this time is modelled as,
+
+$$\Pr(G) = 1 - e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
+
+We assume that a male will always prefer a real nuptial gift to a fake nuptial gift ($F$) or no nuptial gift ($N$), so a fake nuptial gift is only obtained when a real one is not. Hence, the probability that a male obtains a fake nuptial gift during a time period of $T_{m}$ is modelled as, 
+
+$$\Pr(F) = \left(1 - e^{-\frac{1}{\alpha_{2}}T_{m}}\right)e^{-\frac{2}{\alpha_{1}}T_{m}}.$$
+
+Similarly, we assume that a male will only enter the mating pool with no gift if they are unsuccessful in obtaining a real or fake nuptial gift, so the probability that a male obtains no gift after $T_{m}$ is modelled as,
+
+$$\Pr(L) = \left(1 - e^{-\frac{1}{\alpha_{3}}T_{m}}\right)e^{-T_{m}\left(\frac{1}{\alpha_{1}} + \frac{1}{\alpha_{2}}\right)}.$$
+
+In the above, $\alpha_{1}$, $\alpha_{2}$, and $\alpha_{3}$ are parameters modulating the probability of successful search, where we assume $\alpha_{1} < \alpha_{2} < \alpha_{3}$ (i.e., it is most difficult to obtain a real nuptial gift and least difficult to obtain no gift). Assume that the fitness increments associated with a real, fake, and no nuptial gift are $V_{G}$, $V_{F}$, and $V_{N}$, respectively. Male fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
+
+$$W_{m} = \frac{\Pr(G)V_{G} + \Pr(F)V_{F} + \Pr(L)V_{N}}{T_{m} + \frac{\sqrt{\beta}}{m}}.$$
+
+
+
+
+
+
+
+
+
+
