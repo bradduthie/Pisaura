@@ -37,7 +37,7 @@ We can now ask a relevant question for female fitness. Under what conditions sho
 
 $$\Pr(g)\frac{W_{f}(g)}{T_{F} + T_{N}} > \frac{W_{f}(n)}{T_{F}}.$$
 
-Verbally, the probability that a female finds a male with a gift that produces higher fitness offspring -- note, we might need to account for the fitness loss of not finding a new male? It might make sense to define a variable that is the time it takes to find a male with a gift (expected time). This shouldn't be too difficult.
+Verbally, the probability that a female finds a male with a gift that produces higher fitness offspring. Note that we do not need to subtract a term for the fitness loss that might happen if the female fails to find any male. This would be double counting. The right-hand side of the inequality is the expected fitness for the female if she sticks with the male without a nuptial gift. The left-hand side of the inequality is her expected fitness if she rejects that male and spends a time of $T_{N}$ within the mating pool looking for a male with a nuptial gift.
 
 
 Male fitness
@@ -50,13 +50,13 @@ $$\Pr(G) = 1 - e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
 
 We assume that a male will always prefer a real nuptial gift to a fake nuptial gift ($F$) or no nuptial gift ($N$), so a fake nuptial gift is only obtained when a real one is not. Hence, the probability that a male obtains a fake nuptial gift during a time period of $T_{m}$ is modelled as, 
 
-$$\Pr(F) = \left(1 - e^{-\frac{1}{\alpha_{2}}T_{m}}\right)e^{-\frac{2}{\alpha_{1}}T_{m}}.$$
+$$\Pr(F) = \left(1 - e^{-\frac{1}{\alpha_{2}}T_{m}}\right)e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
 
 Similarly, we assume that a male will only enter the mating pool with no gift if they are unsuccessful in obtaining a real or fake nuptial gift, so the probability that a male obtains no gift after $T_{m}$ is modelled as,
 
-$$\Pr(L) = \left(1 - e^{-\frac{1}{\alpha_{3}}T_{m}}\right)e^{-T_{m}\left(\frac{1}{\alpha_{1}} + \frac{1}{\alpha_{2}}\right)}.$$
+$$\Pr(L) = e^{-T_{m}\left(\frac{1}{\alpha_{1}} + \frac{1}{\alpha_{2}}\right)}.$$
 
-In the above, $\alpha_{1}$, $\alpha_{2}$, and $\alpha_{3}$ are parameters modulating the probability of successful search, where we assume $\alpha_{1} < \alpha_{2} < \alpha_{3}$ (i.e., it is most difficult to obtain a real nuptial gift and least difficult to obtain no gift). Assume that the fitness increments associated with a real, fake, and no nuptial gift are $V_{G}$, $V_{F}$, and $V_{N}$, respectively. Male fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
+In the above, $\alpha_{1}$ and $\alpha_{2}$ are parameters modulating the probability of successful search, where we assume $\alpha_{1} < \alpha_{2}$ (i.e., it is more difficult to obtain a real nuptial gift than a fake one). Assume that the fitness increments associated with a real, fake, and no nuptial gift are $V_{G}$, $V_{F}$, and $V_{L}$, respectively. Male fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
 
 $$W_{m} = \frac{\Pr(G)V_{G} + \Pr(F)V_{F} + \Pr(L)V_{N}}{T_{m} + \frac{\sqrt{\beta}}{m}}.$$
 
