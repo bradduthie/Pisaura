@@ -1,6 +1,6 @@
 N    <- 1000; # Number of females and males;
-Qav  <- 1; # Payoff to virigin female given no-gift male
-Qfv  <- 1; # Payoff to virigin female given worthless gift male   
+Qav  <- 1; # Payoff to virgin female given no-gift male
+Qfv  <- 1; # Payoff to virgin female given worthless gift male   
 Qgv  <- 2; # Payoff to virgin female given genuine gift male
 Qam  <- 1; # Payoff to mated female given no-gift male
 Qfm  <- 1; # Payoff to mated female given worthless gift male
@@ -13,7 +13,7 @@ Pfm  <- 1; # Payoff to male for worthless gift to mated female
 Pgm  <- 0; # Payoff to male for geniune gift to mated female
 
 # Fix population size
-# Start with resident no nuptual gift
+# Start with resident no nuptial gift
 # Input Ander's parameter values
 make_inds <- function(N = 100, Qav = 1, Qfv = 1, Qgv = 2, Qam = 1, Qfm = 1, 
                       Qgm = 1, Pav = 2, Pfv = 1, Pgv = 1, Pam = 1, Pfm = 1, 
@@ -252,7 +252,7 @@ replicate_sims <- function(N = 1000, gens = 200, print_end = TRUE, reps = 10,
   rep_results <- NULL;
   csv_head    <- c("sim,", "N,", "gens,", "Qav,", "Qfv,", "Qgv,", "Qam,", 
                    "Qfm,", "Qgm,", "Pav,", "Pfv,", "Pgv,", "Pam,", "Pfm,", 
-                   "Pgm,", "gen,", "F_a,", "F_f,", "F_g", "N \n");
+                   "Pgm,", "gen,", "F_a,", "F_f,", "F_g,", "N,", "enc \n");
   cat(csv_head, file = res_file);
   
   for(i in 1:reps){
@@ -286,7 +286,7 @@ replicate_sims <- function(N = 1000, gens = 200, print_end = TRUE, reps = 10,
       sim_res          <- run_sim(N = N, gens = gens, print_gen = print_gen, 
                                   Qav, Qfv, Qgv, Qam, Qfm, Qgm, Pav, Pfv, Pgv, 
                                   Pam, Pfm, Pgm , encounter_rate);
-      end_results      <- c(i, parameters, sim_res[gens, ]);
+      end_results      <- c(i, parameters, sim_res[gens, ], encounter_rate);
       
       cat(end_results, file = res_file, append = TRUE, sep = ",");
       cat("\n", file = res_file, append = TRUE);
@@ -303,7 +303,7 @@ replicate_sims <- function(N = 1000, gens = 200, print_end = TRUE, reps = 10,
 
 GEN  <- 12000;
 REP  <- 1000;
-sims <- replicate_sims(gens = GEN, reps = REP, print_gen = TRUE);
+sims <- replicate_sims(gens = GEN, reps = REP, print_gen = FALSE);
 
 
 # See how far everything has moved
