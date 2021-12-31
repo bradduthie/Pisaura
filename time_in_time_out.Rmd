@@ -12,14 +12,13 @@ Model
 
 We use a time-in and time-out model in which females and males spend some period of time searching for a mate (time-in) followed by a period of cool down outside the mating pool (time-out).
 
-After mating, we assume that females must spend some time processing offspring ($T_{f}$). Males must spend time out of the mating pool to replenish sperm and search for (fake or real) nuptial gifts. When males return from time out, they encounter females with some probability that is a function of the encounter rate between opposite sex conspecifics ($M$) and the sex ratio ($\beta$; males:females). Mortality occurs for females in ($\mu_{if}$) and out ($\mu_{of}$) of the mating pool, and for males in ($\mu_{im}$) and out ($\mu_{om}$) of the mating pool. First, we describe the fitness consequences of male search time for a nuptial gifts. We then describe the fitness consequences of female choice to accept or reject males based on their provision of a nuptial gift. 
+After mating, we assume that females must spend some time processing offspring ($T_{f}$). Male time to replenish sperm is negligible, but males can spend time out of the mating pool to search for (fake or real) nuptial gifts. When males return from time out, they encounter females with some probability that is a function of the encounter rate between opposite sex conspecifics ($M$) and the sex ratio ($\beta$; males:females). Mortality occurs for females in ($\mu_{if}$) and out ($\mu_{of}$) of the mating pool, and for males in ($\mu_{im}$) and out ($\mu_{om}$) of the mating pool. First, we describe the fitness consequences of male search time for a nuptial gifts. We then describe the fitness consequences of female choice to accept or reject males based on their provision of a nuptial gift. 
 
 
 Male fitness
 ----------------------------
 
-
-During time-out, males search for a nuptial gift for a time period of $T_{m}$. The probability that a male obtains a true nuptial gift ($G$) during this time is modelled as,
+During time-out, males search for a nuptial gift for a time period of $T_{m}$. Males must spend the full $T_{m}$ in the time-out phase, even if they succeed in finding a nuptial gift. The probability that a male obtains a true nuptial gift ($G$) during this time is modelled as,
 
 $$\Pr(G) = 1 - e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
 ```{r, echo = FALSE}
@@ -30,8 +29,7 @@ PrGf <- function(Tm, a1){
 ```
 
 
-
-We assume that a male will always prefer a true nuptial gift to a fake nuptial gift ($F$) or no nuptial gift ($N$), so a fake nuptial gift is only obtained when a true one is not. Hence, the probability that a male obtains a fake nuptial gift during a time period of $T_{m}$ is modelled as, 
+In the above, $\alpha_{1}$ is the amount of time expected to pass before a male encounters a true nuptial gift. Similarly, we define $\alpha_{2}$ to be the amount of time expected to pass before a male encounters a fake nuptial gift. We assume that a male will always prefer a true nuptial gift to a fake nuptial gift ($F$) or no nuptial gift ($N$), so a fake nuptial gift is only obtained when a true one is not. Hence, the probability that a male obtains a fake nuptial gift during a time period of $T_{m}$ is modelled as, 
 
 $$\Pr(F) = \left(1 - e^{-\frac{1}{\alpha_{2}}T_{m}}\right)e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
 
@@ -48,12 +46,12 @@ $$\Pr(L) = e^{-T_{m}\left(\frac{1}{\alpha_{1}} + \frac{1}{\alpha_{2}}\right)}.$$
 
 ```{r, echo = FALSE}
 PrLf <- function(Tm, a1, a2){
-  vals <- 1 - exp(-((1/a1) + (1/a2))*Tm);
+  vals <- exp(-((1/a1) + (1/a2))*Tm);
   return(vals);
 }
 ```
 
-In the above, $\alpha_{1}$ and $\alpha_{2}$ are parameters modulating the probability of successful search, where we assume $\alpha_{1} < \alpha_{2}$ (i.e., it is more difficult to obtain a real nuptial gift than a fake one). Assume that the fitness increments associated with a real, fake, and no nuptial gift are $V_{G} = 1 + \gamma$, $V_{F} = 1$, and $V_{L} = 1$, respectively. Male fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
+We assume that $\alpha_{1} > \alpha_{2}$ (i.e., it is more difficult to obtain a real nuptial gift than a fake one). For simplicity, we further assume that the fitness increments associated with a real, fake, and no nuptial gift are $V_{G} = 1 + \gamma$, $V_{F} = 1$, and $V_{L} = 1$, respectively. Male fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
 
 $$W_{m} = \frac{\Pr(G)V_{G} + \Pr(F)V_{F} + \Pr(L)V_{N}}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
 
@@ -72,14 +70,16 @@ W_mf_full  <- function(gamma, Tm, beta_val, M, a1, a2){
   PrL_val  <- PrLf(Tm = Tm, a1 = a1, a2 = a2);
   W_mf_val <- W_mf(PrG = PrG_val, PrF = PrF_val, PrL = PrL_val, Tm = Tm, 
                    gamma = gamma, beta = beta_val, M = M);
+  return(W_mf_val);
 }
 ```
 
+Our objective now is to determine the conditions under which a focal male increases its fitness by searching for a nuptial gift ($T_{m} > 0$) in a population of resident males that do not search ($T_{m} = 0$).
 
 Initial conditions for nuptial gift-giving
 ----------------------------
 
-We assume that the ancestral condition is one in which no nuptial gifts are sought by males (i.e., $T_{M} = 0$) and females therefore exhibit no choice in males with or without nuptial gifts. Under such conditions, male fitness cannot be affected by female choice, so selection to increase $T_{M} > 0$ must be based solely on $\alpha_{1}$, $\alpha_{2}$, $\sqrt{\beta}/M$, $\gamma$, $m_{im}$, and $m_{om}$. For simplicity, and following @Kokko2006b, we assume $m_{im} = m_{om} = 1$ and $M = 100$. This leaves $\alpha_{1}$, $\alpha_{2}$, $\beta$, and $\gamma$.
+We assume that the ancestral condition is one in which no nuptial gifts are sought by males (i.e., $T_{M} = 0$) and females therefore exhibit no choice in males with or without nuptial gifts. Under such conditions, male fitness cannot be affected by female choice, so selection to increase $T_{M} > 0$ must be based solely on $\alpha_{1}$, $\alpha_{2}$, $\beta$, $M$, $\gamma$, $m_{im}$, and $m_{om}$. For simplicity, and following @Kokko2006b, we assume $m_{im} = m_{om} = 1$. This leaves $M$, $\alpha_{1}$, $\alpha_{2}$, $\beta$, and $\gamma$.
 
 Ignoring the recursion for now and just letting $\beta = 1$ (equal sex ratio in time-in stage), we can move on to seeing how fitness changes with a change in $T_{M}$.
 
@@ -88,9 +88,6 @@ The first question that we want to ask is under what conditions does male inclus
 ```{r, echo = FALSE}
 W_m  <- function(mom = 1, mim = 1, mof = 1, mif = 1, M = 100, TF, TM, gamma, 
                  a1, a2, beta = 1){
-  pG <- PrGf(Tm = TM, a1 = a1);
-  pF <- PrFf(Tm = TM, a1 = a1, a2 = a2);
-  pL <- PrLf(Tm = TM, a1 = a1, a2 = a2);
   bb <- beta;
   WW <- W_mf_full(gamma = gamma, Tm = TM, beta_val = bb, M = M, a1 = a1, 
                   a2 = a2);
@@ -118,6 +115,11 @@ $$\frac{\partial W_{m}}{\partial T_{m}} = \frac{M^{2} \left(\gamma e^{\frac{T_{M
 
 $$\frac{\partial W_{m}}{\partial T_{m}} = \frac{\gamma \left(\frac{\left(\frac{\left(T_{M} + \frac{\sqrt{\beta}}{M} \right)}{\alpha_{1}} + 1 \right)}{e^{\frac{1}{\alpha_{1}}T_{M}}} - 1 \right) - 1}{\left(T_{M} + \frac{\sqrt{\beta}}{M} \right)^{2}}.$$
 
+<!---
+
+0 = ( (G * ((((T + ((B^(1/2))/M)) / a) + 1) /(e^(T/a)) - 1)) - 1) / ((T + ((B^(1/2))/M))^2)
+
+--->
 
 
 ```{r, echo = FALSE}
@@ -159,7 +161,6 @@ $$\gamma > \alpha_{1}\frac{M}{\sqrt{\beta}}.$$
 Verbally, the inclusive fitness benefit to offspring provided by the nuptial gift must exceed the search time needed to find a nuptial gift ($\alpha_{1}$) times the male mate encounter rate ($M / \sqrt{\beta}$). Hence, we should expect nuptial gift giving to evolve when the fitness benefit of the nuptial gift to offspring is high relative to the time needed to find a nuptial gift and the encounter rate of females and males in the mating pool. 
 
 
-
 Female fitness
 ----------------------------
 
@@ -187,31 +188,109 @@ $$\Pr(g)\frac{W_{f}(g)}{T_{F} + T_{N}} > \frac{W_{f}(n)}{T_{F}}.$$
 Verbally, this is the probability that a female finds a male with a gift that produces higher fitness offspring. Note that we do not need to subtract a term for the fitness loss that might happen if the female fails to find any male. This would be double counting. The right-hand side of the inequality is the expected fitness for the female if she sticks with the male without a nuptial gift. The left-hand side of the inequality is her expected fitness if she rejects that male and spends a time of $T_{N}$ within the mating pool looking for a male with a nuptial gift.
 
 
+Evolution of nuptial gift giving
+----------------------------
+
+```{r, echo = FALSE}
+Wp <- function(M, beta, Tm, a1, gamma){
+  topp <- gamma * ((((Tm + (sqrt(beta)/M)) / a1) + 1) /(exp(Tm/a1)) - 1) - 1;
+  bott <- (Tm + sqrt(beta)/M)^2
+  val  <- topp / bott;
+  return(val);
+}
+
+Wpp <- function(M, beta, Tm, a1, gamma){
+    top1  <- 1 + (((sqrt(beta)/M) + Tm) / a1);
+    bot1  <- exp(Tm/a1);
+    topp2 <- 2 * (1 + gamma*(1 - top1 / bot1));
+    bott2 <- (Tm + (sqrt(beta)/M))^2;
+    term2 <- gamma / ((a1*a1)*exp(Tm/a1));
+    bott  <- Tm + sqrt(beta)/M;
+    val   <- ((topp2 / bott2) - term2) / bott;
+    return(val);
+}
+```
+
+
+<!---
+
+0 = ( (G * ((((T + ((B^(1/2))/M)) / a) + 1) /(e^(T/a)) - 1)) - 1) / ((T + ((B^(1/2))/M))^2)
+
+
+0 = ( ((1/2) * ((((T + ((1^(1/2))/1)) / (1/16)) + 1) /(e^(T/(1/16))) - 1)) - 1) / ((T + ((1^(1/2))/1))^2)
+
+--->
 
 
 
+```{r, echo = FALSE}
+findWpmin <- function(M, beta, a1, gamma, b0, b1){
+  bynum   <- ((b1 + b0)/2 - b0) / 1000;
+  TMvals1 <- seq(from = b0, to = (b1 + b0)/2, by = bynum);
+  TMvals2 <- seq(from = (b1 + b0)/2, to = b1, by = bynum);
+  abm     <- 10000;
+  while(bynum > 0 & abm > 0.0001){
+      ab1 <- abs(Wp(M = M, beta = beta, Tm = TMvals1, a1 = a1, gamma = gamma));
+      ab2 <- abs(Wp(M = M, beta = beta, Tm = TMvals2, a1 = a1, gamma = gamma));
+      mn1 <- min(ab1);
+      mn2 <- min(ab2);
+      abm <- min(c(mn1, mn2));
+      if(mn1 < mn2){
+          b1  <- (b1 + b0)/2;
+      }else{
+          b0  <- (b1 + b0)/2;
+      }
+      bynum   <- ((b1 + b0)/2 - b0) / 1000;
+      TMvals1 <- seq(from = b0, to = (b1 + b0)/2, by = bynum);
+      TMvals2 <- seq(from = (b1 + b0)/2, to = b1, by = bynum);
+  }
+  return((b1 + b0)/2);
+}
+```
 
 
+```{r, echo = FALSE}
+TMvals  <- seq(from = 0.00001, to = 1, by = 0.00001);
+malefit <- W_m(mom = 1, mim = 1, mof = 1, mif = 1, M = 1, TF = 1, gamma = 1/2,
+               a1 = 1/16, a2 = Inf, beta = 1, TM = TMvals);
+TmOpt <- findWpmin(M = 1, beta = 1, gamma = 1/2, a1 = 1/16, b0 = 0, b1 = 10);
+optMF <- W_m(mom = 1, mim = 1, mof = 1, mif = 1, M = 1, TF = 1, gamma = 1/2,
+             a1 = 1/16, a2 = Inf, beta = 1, TM = TmOpt);
+```
+
+To model the evolution of nuptial gift giving from an ancestral state in which no nuptial gifts are provided, we first evaluate male fitness for an initial set of conditions. We assume that males first evolve optimal search time for nuptial gifts, then that females will evolve to accept or reject males without gifts. Evolved female choosiness can subsequently alter male fitness. We thereby simulate the evolution of male nuptial gift search and female choice. We do this first assuming that males do not search for fake nuptial gifts (setting $\alpha_{2} = \infty$), determining the dynamics of $T_{m}$ when only real nuptial gifts are provided before introducing fake nuptial gifts as an option for males.
+
+For male fitness, given that the condition $\gamma > \alpha_{1}(M / \sqrt{\beta})$ is fulfilled, fitness will peak at some positive value of $T_{m}$. For illustration, we first select values $M = 1$, $\beta = 1$, $\alpha_{1} = 1/16$, and $\gamma = 1/2$. Under these conditions, we can find the value of $W_{m}$ across $T_{m}$ to determine its optimal value, $T^{*}_{m}$. Using a squeeze algorithm, we find $T^{*}_{m} = `r TmOpt`$, as indicated by the point in Figure 1.
+
+```{r, echo = FALSE}
+par(mar = c(5, 5, 1, 1));
+plot(x = TMvals, y = malefit, type = "l", lwd = 2, cex.lab = 1.25,
+     ylim = c(0, 1.5),
+     xlab = expression(paste("Time out for males (", T[m], ")")),
+     ylab = expression(paste("Male fitness (", W[m], ")")));
+abline(h = 0, lty = "dotted", lwd = 0.8);
+points(x = TmOpt, y = optMF, pch = 20, col = "black");
+```
 
 
+<!--- 
 
+Derivative of W with respect to T
 
+```{r, echo = FALSE}
+TMvals   <- seq(from = 0.00001, to = 1, by = 0.00001);
+dmalefit <- Wp(M = 1, beta = 1, a1 = 1/16, gamma = 1/2, Tm = TMvals);
+par(mar = c(5, 5, 1, 1));
+plot(x = TMvals, y = dmalefit, type = "l", lwd = 2, cex.lab = 1.25,
+     xlab = expression(paste("Time out for males (", T[m], ")")),
+     ylab = expression(paste(partialdiff,"W"[m],"/",partialdiff,"T"[m])));
+abline(h = 0, lty = "dotted", lwd = 0.8);
+mxfit <- which(malefit == max(malefit));
+optTm <- TMvals[mxfit];
+points(x = optTm, y = dmalefit[mxfit], pch = 20);
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+--->
 
 
 
@@ -229,6 +308,19 @@ Verbally, this is the probability that a female finds a male with a gift that pr
 
 \clearpage
 
+
+Second derivative of fitness
+==============================
+
+Second derivative of fitness with respect to search time,
+
+$$\frac{\partial^2 W_{m}}{\partial T_{m}^2} = \frac{\frac{2\left(1 + \gamma\left(1 - \frac{1 + \frac{\frac{\sqrt{\beta}}{M} + T_{m}}{\alpha_{1}}}{e^{\frac{1}{\alpha_{1}}T_{m}}}\right)\right)}{\left(T_{m} + \frac{\sqrt{\beta}}{M}\right)^{2}} - \frac{\gamma}{\alpha_{1}^{2}e^{\frac{1}{\alpha_{1}}T_{m}}}}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
+<!---
+
+
+0 = ((((2 * (1 + (G*(1 - ((1 + ((((B^(1/2))/M) + T) / a))/e^(T/a))))))) / ((T + ((B^(1/2))/M))^2)) - (G / (a^2 * (e^(T/a)))) ) / (T + (B^(1/2) / M)) 
+
+--->
 
 
 Old stuff
@@ -432,5 +524,69 @@ N = ((G * (  ( ( ( (0 + ((B^(1/2))/M)) / a ) + 1) / (e^(0/a)) ) - 1 ) ) - 1) / (
 --->
 
 
+Stop searching when found
+===============================
+
+**This is all wrong because of a mistake with Pr(G)**. I don't think that this is worth it unless absolutely necessary.
+
+<!---
+
+W = (( (1 - e^(-(T/a))) * (G + 1) ) + ( (1 - (e^(-T/b)) ) * (e^(-T/a)) ) + ( e^(-T*((1/a) + (1/b))) ))  /   (a + ((B^(1/2))/M))
+
+--->
+
+This was the original fitness equation,
+
+$$W_{m} = \frac{\Pr(G)(1 + \gamma) + \Pr(F) + \Pr(L)}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
+
+But here is the fitness equation if males stop searching once they have found something, and I am getting rid of the fake nuptial gift now just to keep things tractable (assume $\alpha_{2} \to \infty$),
+
+$$W_{m} = \frac{\Pr(G)(1 + \gamma)}{\alpha_{1} + \frac{\sqrt{\beta}}{M}} + \frac{\Pr(L)}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
+
+<!---
+
+W = (( (1 - e^(-(T/a))) * (G + 1) ) / (a + ((B^(1/2))/M))) + (( (1 - (e^(-T/b)) ) * (e^(-T/a)) ) / (b + ((B^(1/2))/M))) + (( e^(-T*((1/a) + (1/b))) ) / (T + ((B^(1/2))/M))) 
+
+
+W = (( (1 - e^(-(T/a))) * (G + 1) ) / (a + ((B^(1/2))/M)))  + (( e^(-T*((1/a))) ) / (T + ((B^(1/2))/M))) 
+
+--->
+
+Now,
+
+$$\frac{\partial W_{m}}{\partial T_{m}} = \frac{\frac{\gamma + 1}{\alpha_{1}^{2} + \frac{\alpha_{1}\sqrt{\beta}}{M}}  -  \frac{ \frac{T + \frac{\sqrt{\beta}}{M}}{a} + 1}{\left( T_{m} + \frac{\sqrt{\beta}}{M} \right)^{2}}}{e^{\frac{1}{\alpha_{1}}T_{m}}}.$$
+<!---
+
+D = ((G + 1) / (a^2 + (a*(B^(1/2))/M))) - ((( (((B^(1/2))/M)) / a) + 1) / (((B^(1/2)/M)^2)))
+
+0 = ((G + 1) / (a^2 + (a*(B^(1/2))/M))) - ((( (((B^(1/2))/M)) / a) + 1) / (((B^(1/2)/M)^2)))
+
+
+0 = ((G + 1) / (a^2 + (a*(1^(1/2))/M))) - ((( (((1^(1/2))/M)) / a) + 1) / (((1^(1/2)/M)^2)))
+
+
+--->
+
+From here, we end up with,
+
+$$\gamma > \frac{\left(M\alpha_{1}\right)^{2}}{\beta} - \frac{2M\alpha_{1}}{\sqrt{\beta}}.$$
+
+
+
 References
 ======================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
