@@ -29,35 +29,30 @@ PrGf <- function(Tm, a1){
 ```
 
 
-In the above, $\alpha_{1}$ is the amount of time expected to pass before a male encounters a true nuptial gift. Similarly, we define $\alpha_{2}$ to be the amount of time expected to pass before a male encounters a fake nuptial gift. We assume that a male will always prefer a true nuptial gift to a fake nuptial gift ($F$) or no nuptial gift ($N$), so a fake nuptial gift is only obtained when a true one is not. Hence, the probability that a male obtains a fake nuptial gift during a time period of $T_{m}$ is modelled as, 
-
-$$\Pr(F) = \left(1 - e^{-\frac{1}{\alpha_{2}}T_{m}}\right)e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
+In the above, $\alpha_{1}$ is the amount of time expected to pass before a male encounters a nuptial gift. 
 
 ```{r, echo = FALSE}
-PrFf <- function(Tm, a1, a2){
+PrFf <- function(Tm, a1, a2 = Inf){
   vals <- (1 - exp(-(1/a2)*Tm)) * exp(-(1/a1)*Tm);
   return(vals);
 }
 ```
 
-Similarly, we assume that a male will only enter the mating pool with no gift if they are unsuccessful in obtaining a real or fake nuptial gift, so the probability that a male obtains no gift after $T_{m}$ is modelled as,
+Similarly, we assume that a male will only enter the mating pool with no gift if they are unsuccessful in obtaining gift, so the probability that a male obtains no gift after $T_{m}$ is modelled as,
 
-$$\Pr(L) = e^{-T_{m}\left(\frac{1}{\alpha_{1}} + \frac{1}{\alpha_{2}}\right)}.$$
+$$\Pr(L) = e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
 
 ```{r, echo = FALSE}
-PrLf <- function(Tm, a1, a2){
+PrLf <- function(Tm, a1, a2 = Inf){
   vals <- exp(-((1/a1) + (1/a2))*Tm);
   return(vals);
 }
 ```
 
-We assume that $\alpha_{1} > \alpha_{2}$ (i.e., it is more difficult to obtain a real nuptial gift than a fake one). For simplicity, we further assume that the fitness increments associated with a real, fake, and no nuptial gift are $V_{G} = 1 + \gamma$, $V_{F} = 1$, and $V_{L} = 1$, respectively. Male fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
+For simplicity, we assume that the fitness increments associated with nuptial gift versus no nuptial gift are $V_{G} = 1 + \gamma$ and $V_{L} = 1$, respectively. Male fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
 
-$$W_{m} = \frac{\Pr(G)V_{G} + \Pr(F)V_{F} + \Pr(L)V_{N}}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
 
-We can simplify this with the fitness values,
-
-$$W_{m} = \frac{\Pr(G)(1 + \gamma) + \Pr(F) + \Pr(L)}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
+$$W_{m} = \frac{\Pr(G)(1 + \gamma) + \Pr(L)}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
 
 ```{r, echo = FALSE}
 W_mf <- function(PrG, PrF, PrL, gamma, Tm, beta, M){
@@ -79,7 +74,7 @@ Our objective now is to determine the conditions under which a focal male increa
 Initial conditions for nuptial gift-giving
 ----------------------------
 
-We assume that the ancestral condition is one in which no nuptial gifts are sought by males (i.e., $T_{M} = 0$) and females therefore exhibit no choice in males with or without nuptial gifts. Under such conditions, male fitness cannot be affected by female choice, so selection to increase $T_{M} > 0$ must be based solely on $\alpha_{1}$, $\alpha_{2}$, $\beta$, $M$, $\gamma$, $m_{im}$, and $m_{om}$. For simplicity, and following @Kokko2006b, we assume $m_{im} = m_{om} = 1$. This leaves $M$, $\alpha_{1}$, $\alpha_{2}$, $\beta$, and $\gamma$.
+We assume that the ancestral condition is one in which no nuptial gifts are sought by males (i.e., $T_{M} = 0$) and females therefore exhibit no choice in males with or without nuptial gifts. Under such conditions, male fitness cannot be affected by female choice, so selection to increase $T_{M} > 0$ must be based solely on $\alpha_{1}$, $\beta$, $M$, $\gamma$, $m_{im}$, and $m_{om}$. For simplicity, and following @Kokko2006b, we assume $m_{im} = m_{om} = 1$. This leaves $M$, $\alpha_{1}$, $\beta$, and $\gamma$.
 
 Ignoring the recursion for now and just letting $\beta = 1$ (equal sex ratio in time-in stage), we can move on to seeing how fitness changes with a change in $T_{M}$.
 
@@ -154,38 +149,69 @@ dWdT_check <- function(gamma, beta = 1, M = 100, a1 = 1){
 }
 ```
 
-The above equation makes intuitive sense. First note, trivially, that if the interaction rate is $M = 0$, then no change in fitness occurs (since females and males cannot mate). The change in fitness caused by searching for nuptial gifts is increased when $\gamma$ is high, scaled by the search time needed to find a true nuptial gift ($\alpha_{1}$; recall that $Pr(G)$ decreases with increasing $\alpha_{1}$). From this first term, a second term is subtracted that reflects a loss in fitness proportional to the encounter rate of potential mates in the mating pool. We can identify the conditions under which male inclusive fitness increases by searching for a nuptial gift by setting $\partial W_{m} / \partial T_{m} = 0$ and solve for $\gamma$, 
+The above equation makes intuitive sense. First note, trivially, that if the interaction rate is $M = 0$, then no change in fitness occurs (since females and males cannot mate). The change in fitness caused by searching for nuptial gifts is increased when $\gamma$ is high, scaled by the search time needed to find a nuptial gift (recall that $Pr(G)$ decreases with increasing $\alpha_{1}$). From this first term, a second term is subtracted that reflects a loss in fitness proportional to the encounter rate of potential mates in the mating pool. We can identify the conditions under which male inclusive fitness increases by searching for a nuptial gift by setting $\partial W_{m} / \partial T_{m} = 0$ and solve for $\gamma$, 
 
 $$\gamma > \alpha_{1}\frac{M}{\sqrt{\beta}}.$$
 
 Verbally, the inclusive fitness benefit to offspring provided by the nuptial gift must exceed the search time needed to find a nuptial gift ($\alpha_{1}$) times the male mate encounter rate ($M / \sqrt{\beta}$). Hence, we should expect nuptial gift giving to evolve when the fitness benefit of the nuptial gift to offspring is high relative to the time needed to find a nuptial gift and the encounter rate of females and males in the mating pool. 
 
+An alternative for male gift giving
+-------------------------------------
+
+Up until now, we have assumed that males invest a fixed amount of time $T_{m}$ in the time-out phase searching for nuptial gifts. While this simplifying assumption is unlikely to be problematic for determining the initial evolution of nuptial gift searching behaviour ($\partial W_{m} / \partial T_{m}$), it might not reflect the strategy of males in real systems. For example, instead of spending a fixed amount of time in time-out phase, males might instead to select one of two strategies; either search or do not search for a nuptial gift. Males with the former strategy might simply continue to search until a nuptial gift is found, while males that do not search will simply re-enter the mating pool. In this case, time searching for a nuptial gift will come at the cost of mating opportunities, but might increase the fitness of offspring. We therefore need to model the expected length of time $E[T_{m}]$ spent outside of the mating pool for males that search for nuptial gifts, which is simply $\alpha_{1}$. Note that we can integrate search time $t$ over the rate at which nuptial gifts are encountered ($\exp(-1/\alpha_{1})$) to show $E[T_{m}] = \alpha_{1}$,
+
+$$\int_{0}^{\infty}e^{- \frac{1}{\alpha_{1}}t}dt = \alpha_{1}.$$
+
+The rate at which a focal male that searches for a nuptial gift increases his fitness is therefore fitness of offspring $(1 + \gamma)$ divided by expected time spent searching for a nuptial gift ($\alpha_{1}$) plus time spent in the mating pool ($\sqrt{\beta} / M$),
+
+$$W_{m,G} = \frac{1 + \gamma}{\alpha_{1} + \left(\frac{\sqrt{\beta}}{M} \right)}.$$
+
+In contrast, a male that does not search for a nuptial gift has offspring with lower fitness, but spends less time outside of the mating pool,
+
+$$W_{m,L} = \frac{1}{\left(\frac{\sqrt{\beta}}{M}\right)} = \frac{M}{\sqrt{\beta}}.$$
+
+We can then determine the conditions for which $W_{m,G} > W_{m,L}$, isolating $\gamma$ to find how large of a fitness benefit must be provided by the nuptial gift to make the search cost worthwhile,
+
+$$\gamma > \frac{\alpha_{1}M}{\sqrt{\beta}}.$$
+
+Recall that this is the exact same inequality that we obtained when assuming the initial condition $T_{M} = 0$ and evaluating $\partial W_{m} / \partial T_{m}$. If $M = 1$ and $\beta = 1$, then we get the elegant $\gamma > \alpha_{1}$. That is, the inclusive fitness increase must be greater than the time spent searching for a nuptial gift. As the interaction rate $M$ increases, the fitness benefit must be even higher to compensate for the opportunity cost of being able to enter the mating pool early by not searching for a nuptial gift.
+
+
 
 Female fitness
 ----------------------------
 
-During time-out, females process offspring over a duration of $T_{f}$. When females re-enter the mating pool, they will then encounter males at a rate of $M\sqrt{\beta}$. We assume that female offspring receive a fitness increment of $\gamma \geq 0$ from males that provide a true nuptial gift. Female fitness therefore never decreases by mating with a male with a nuptial gift versus a male without one. Therefore, if a female encounters a male with a nuptial gift, we assume that she will mate with him. But if a female encounters a male with no nuptial gift, then she might accept or reject the male. If she rejects the male, then she will remain in the mating pool. We assume that females cannot distinguish between true and fake nuptial gifts.
+During time-out, females process offspring over a duration of $T_{f}$. When females re-enter the mating pool, they will then encounter males at a rate of $M\sqrt{\beta}$. We assume that female offspring receive a fitness increment of $\gamma \geq 0$ from males that provide a true nuptial gift. Female fitness therefore never decreases by mating with a male with a nuptial gift versus a male without one. Therefore, if a female encounters a male with a nuptial gift, we assume that she will mate with him. But if a female encounters a male with no nuptial gift, then she might accept or reject the male. If she rejects the male, then she will remain in the mating pool.
 
-We model the probability that a female encounters a male with a nuptial gift (real or fake) after a duration of $T_{N}$ in the mating pool as,
+We model the probability that a female encounters a male with a nuptial gift after a duration of $T_{N}$ in the mating pool as,
 
-$$\Pr(g) = 1 - e^{-T_{N}\left( M \sqrt{\beta}\right) \left( \Pr(G) + \Pr(F) \right)}.$$
+$$\Pr(g) = 1 - e^{-T_{N}\left( M \sqrt{\beta}\right) \Pr(G)}.$$
 
-In the above, $\Pr(G)$ and $\Pr(F)$ are the probabilities that males within the mating pool have successfully obtained a true or fake nuptial gift, respectively (see below). We can similarly model the probability that a female encounters a giftless male after $T_{N}$ as,
+We can similarly model the probability that a female encounters a giftless male after $T_{N}$ as,
 
 $$\Pr(n) = 1 - e^{-T_{N} (M \sqrt{\beta}) \Pr(L)}.$$
 
-Note that $\Pr(g)$ and $\Pr(n)$ need not sum to unity, and if $\Pr(L)$ is sufficiently low, then finding a male with a gift will be easier than finding a male without one (i.e., $\Pr(g) > \Pr(n)$).
+Note that $\Pr(g)$ and $\Pr(n)$ need not sum to unity, and if $\Pr(L)$ is sufficiently low, then finding a male with a gift will be easier than finding a male without one (i.e., $\Pr(g) > \Pr(n)$). Also note that the expected time spent in the mating pool before a focal female encounters a male with a gift will be $1 / (\Pr(G) \times M \sqrt{\beta})$, while the expected time spent in the mating pool before a focal female encounters any male will be $1 / (M \sqrt{\beta})$ (since $\Pr(G) + \Pr(L) = 1$). We can use this to determine the rate at which a female increases her fitness when she is choosy and mates only with males that have gifts versus when she is not choosy and mates with the first male she encounters.
 
-For simplicity, we assume that offspring sired by a giftless male have a fitness of $1$, so offspring sired by males providing gifts have a fitness of $1 + \gamma$. The inclusive fitness of a female whose offspring are sired by a giftless male is therefore $W_{f}(n) = \kappa (1/2)$, where $\kappa$ is total number of offspring. For simply, we assume $\kappa = 2$, meaning that female fitness is $W_{f}(n) = 1$. The inclusive fitness of a female whose offspring are sired by a male with a gift is then,
+The rate at which a female increases her fitness by being choosy and mating only when she encounters a male with a gift is as follows,
 
-$$W_{f}(g) = 1 + \gamma\frac{\Pr(G)}{\Pr(G) + \Pr(F)}.$$
-That is, the fitness increment $\gamma$ multiplied by the probability that a male's gift is true.
+$$W_{f}(g) = \frac{1 + \gamma}{T_{F} + \left(\frac{1}{\Pr(G) \times M \sqrt{\beta}}\right)}.$$
 
-We can now ask a relevant question for female fitness. Under what conditions should she reject a giftless male? Females will have a higher fitness when they reject a giftless male if $W_{f}(g)$ exceeds $W_{f}(n)$ after accounting for the opportunity cost associated with the additional search time spent in the mating pool $T_{N}$,
+If the focal female is not choosy and accepts the first male that she encounters, then the rate at which she increases her fitness is as follows,
 
-$$\Pr(g)\frac{W_{f}(g)}{T_{F} + T_{N}} > \frac{W_{f}(n)}{T_{F}}.$$
+$$W_{f}(n) = \frac{\left(1 + \gamma \right) \Pr(G) + \Pr(L)}{T_{F} + \left(\frac{1}{M \sqrt{\beta}}\right)}.$$
 
-Verbally, this is the probability that a female finds a male with a gift that produces higher fitness offspring. Note that we do not need to subtract a term for the fitness loss that might happen if the female fails to find any male. This would be double counting. The right-hand side of the inequality is the expected fitness for the female if she sticks with the male without a nuptial gift. The left-hand side of the inequality is her expected fitness if she rejects that male and spends a time of $T_{N}$ within the mating pool looking for a male with a nuptial gift.
+We can now ask a relevant question for female fitness. Under what conditions should she be choosy and only accept males with nuptial gifts? To answer this question, we can evaluate the conditions under which $W_{f}(g) > W_{f}(n)$,
+
+$$\gamma > \frac{e^{\frac{1}{\alpha_{1}}T_{M}}}{T_{F}M\sqrt{\beta}   \left(e^{\frac{1}{\alpha_{1}}T_{M}} - 1   \right)  }.$$
+
+<!---
+
+(1 + G) / (F + ((1 / ( (1 - e^(-T/a))  * M * (B^(1/2)))  ))) = ((1 + G)*(1 - e^(-T/a)) + (e^(-T/a)) ) / (F + ((1 / (M * (B^(1/2)))  )))
+
+--->
+
+Under the above conditions in which the fitness increase caused by the nuptial gift is sufficiently high, females will increase their own fitness by rejecting males that do not have a nuptial gift.
 
 
 Evolution of nuptial gift giving
@@ -274,7 +300,7 @@ points(x = TmOpt, y = optMF, pch = 20, col = "black");
 
 
 
-Given $T^{*}_{m} = `r TmOpt`$, we can now calculate $\Pr(G) = `r PrGf(Tm = TmOpt, a1 = 1/16)`$ and $\Pr(L) = `r PrLf(Tm = TmOpt, a1 = 1/16, a2 = Inf)`$. We can then feed 
+Given $T^{*}_{m} = `r TmOpt`$, we can now calculate $\Pr(G) = `r PrGf(Tm = TmOpt, a1 = 1/16)`$ and $\Pr(L) = `r PrLf(Tm = TmOpt, a1 = 1/16, a2 = Inf)`$. We can then feed these values into the equation for female fitness to determine if females should or should not be choosy.
 
 
 
@@ -289,27 +315,15 @@ Given $T^{*}_{m} = `r TmOpt`$, we can now calculate $\Pr(G) = `r PrGf(Tm = TmOpt
 
 \clearpage
 
-An alternative model of male behaviour
-=============================================
+Introducing fake nuptial gifts
+================================
 
-Up until now, we have assumed that males invest a fixed amount of time $T_{m}$ in the time-out phase searching for nuptial gifts. While this simplifying assumption is unlikely to be problematic for determining the initial evolution of nuptial gift searching behaviour ($\partial W_{m} / \partial T_{m}$), it might not reflect the strategy of males in real systems. For example, instead of spending a fixed amount of time in time-out phase, males might instead to select one of two strategies; either search or do not search for a nuptial gift. Males with the former strategy might simply continue to search until a nuptial gift is found, while males that do not search will simply re-enter the mating pool. In this case, time searching for a nuptial gift will come at the cost of mating opportunities, but might increase the fitness of offspring. We therefore need to model the expected length of time $E[T_{m}]$ spent outside of the mating pool for males that search for nuptial gifts, which is simply $\alpha_{1}$. Note that we can integrate search time $t$ over the rate at which nuptial gifts are encountered ($\exp(-1/\alpha_{1})$) to show $E[T_{m}] = \alpha_{1}$,
+I think that for simplicity, we need to wait to do this.
 
-$$\int_{0}^{\infty}e^{- \frac{1}{\alpha_{1}}t}dt = \alpha_{1}.$$
+Similarly, we define $\alpha_{2}$ to be the amount of time expected to pass before a male encounters a fake nuptial gift. We assume that a male will always prefer a true nuptial gift to a fake nuptial gift ($F$) or no nuptial gift ($N$), so a fake nuptial gift is only obtained when a true one is not. Hence, the probability that a male obtains a fake nuptial gift during a time period of $T_{m}$ is modelled as, 
 
-The rate at which a focal male that searches for a nuptial gift increases his fitness is therefore fitness of offspring $(1 + \gamma)$ divided by expected time spent searching for a nuptial gift ($\alpha_{1}$) plus time spent in the mating pool ($\sqrt{\beta} / M$),
-
-$$W_{m,G} = \frac{1 + \gamma}{\alpha_{1} + \frac{\sqrt{\beta}}{M}}.$$
-
-In contrast, a male that does not search for a nuptial gift has offspring with lower fitness, but spends less time outside of the mating pool,
-
-$$W_{m,L} = \frac{1}{\left(\frac{\sqrt{\beta}}{M}\right)} = \frac{M}{\sqrt{\beta}}.$$
-
-We can then determine the conditions for which $W_{m,G} > W_{m,L}$, isolating $\gamma$ to find how large of a fitness benefit must be provided by the nuptial gift to make the search cost worthwhile,
-
-$$\gamma > \frac{\alpha_{1}M}{\sqrt{\beta}}.$$
-Note that this is the exact same inequality that we obtained when assuming the initial condition $T_{M} = 0$ and evaluating $\partial W_{m} / \partial T_{m}$. If $M = 1$ and $\beta = 1$, then we get the elegant $\gamma > \alpha_{1}$. That is, the inclusive fitness increase must be greater than the time spent searching for a nuptial gift. As the interaction rate $M$ increases, the fitness benefit must be even higher to compensate for the opportunity cost of being able to enter the mating pool early by not searching for a nuptial gift.
-
-
+$$\Pr(F) = \left(1 - e^{-\frac{1}{\alpha_{2}}T_{m}}\right)e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
+$$\Pr(L) = e^{-T_{m}\left(\frac{1}{\alpha_{1}} + \frac{1}{\alpha_{2}}\right)}.$$
 
 \clearpage
 
