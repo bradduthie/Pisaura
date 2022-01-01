@@ -151,7 +151,7 @@ dWdT_check <- function(gamma, beta = 1, M = 100, a1 = 1){
 
 The above equation makes intuitive sense. First note, trivially, that if the interaction rate is $M = 0$, then no change in fitness occurs (since females and males cannot mate). The change in fitness caused by searching for nuptial gifts is increased when $\gamma$ is high, scaled by the search time needed to find a nuptial gift (recall that $Pr(G)$ decreases with increasing $\alpha_{1}$). From this first term, a second term is subtracted that reflects a loss in fitness proportional to the encounter rate of potential mates in the mating pool. We can identify the conditions under which male inclusive fitness increases by searching for a nuptial gift by setting $\partial W_{m} / \partial T_{m} = 0$ and solve for $\gamma$, 
 
-$$\gamma > \alpha_{1}\frac{M}{\sqrt{\beta}}.$$
+$$\gamma_{m} > \alpha_{1}\frac{M}{\sqrt{\beta}}.$$
 
 Verbally, the inclusive fitness benefit to offspring provided by the nuptial gift must exceed the search time needed to find a nuptial gift ($\alpha_{1}$) times the male mate encounter rate ($M / \sqrt{\beta}$). Hence, we should expect nuptial gift giving to evolve when the fitness benefit of the nuptial gift to offspring is high relative to the time needed to find a nuptial gift and the encounter rate of females and males in the mating pool. 
 
@@ -172,7 +172,7 @@ $$W_{m,L} = \frac{1}{\left(\frac{\sqrt{\beta}}{M}\right)} = \frac{M}{\sqrt{\beta
 
 We can then determine the conditions for which $W_{m,G} > W_{m,L}$, isolating $\gamma$ to find how large of a fitness benefit must be provided by the nuptial gift to make the search cost worthwhile,
 
-$$\gamma > \frac{\alpha_{1}M}{\sqrt{\beta}}.$$
+$$\gamma_{m} > \frac{\alpha_{1}M}{\sqrt{\beta}}.$$
 
 Recall that this is the exact same inequality that we obtained when assuming the initial condition $T_{M} = 0$ and evaluating $\partial W_{m} / \partial T_{m}$. If $M = 1$ and $\beta = 1$, then we get the elegant $\gamma > \alpha_{1}$. That is, the inclusive fitness increase must be greater than the time spent searching for a nuptial gift. As the interaction rate $M$ increases, the fitness benefit must be even higher to compensate for the opportunity cost of being able to enter the mating pool early by not searching for a nuptial gift.
 
@@ -203,7 +203,7 @@ $$W_{f}(n) = \frac{\left(1 + \gamma \right) \Pr(G) + \Pr(L)}{T_{F} + \left(\frac
 
 We can now ask a relevant question for female fitness. Under what conditions should she be choosy and only accept males with nuptial gifts? To answer this question, we can evaluate the conditions under which $W_{f}(g) > W_{f}(n)$,
 
-$$\gamma > \frac{e^{\frac{1}{\alpha_{1}}T_{M}}}{T_{F}M\sqrt{\beta}   \left(e^{\frac{1}{\alpha_{1}}T_{M}} - 1   \right)  }.$$
+$$\gamma_{f} > \frac{e^{\frac{1}{\alpha_{1}}T_{M}}}{T_{F}M\sqrt{\beta}   \left(e^{\frac{1}{\alpha_{1}}T_{M}} - 1   \right)  }.$$
 
 <!---
 
@@ -212,6 +212,121 @@ $$\gamma > \frac{e^{\frac{1}{\alpha_{1}}T_{M}}}{T_{F}M\sqrt{\beta}   \left(e^{\f
 --->
 
 Under the above conditions in which the fitness increase caused by the nuptial gift is sufficiently high, females will increase their own fitness by rejecting males that do not have a nuptial gift.
+
+
+Male nuptial search and female choosiness
+-------------------------------------------
+
+We can now investigate the values of $\gamma_{m}$ and  $\gamma_{f}$ across parameter space. First, we look across values of $\alpha_{1}$ given fixed values of  $M = 1$, $\beta = 1$, $\alpha_{1} = 1/16$, and $T_{F} = 1$. Note that expected male search time for a nuptial gift will be $T_{M} = \alpha_{1}$, meaning that $exp(T_{m} / \alpha_{1}) = e$.
+
+```{r, echo = FALSE}
+gamma_m <- function(M = 1, beta = 1, alpha = 1/16, TF = 1){
+  return(alpha * (M / sqrt(beta)));
+}
+```
+
+```{r, echo = FALSE}
+gamma_f <- function(M = 1, beta = 1, alpha = 1/16, TF = 1){
+  topp <- exp(alpha / alpha);
+  bott <- TF * M * sqrt(beta) * (exp(alpha/alpha) - 1);
+  return(topp/bott);
+}
+```
+
+
+```{r, echo = FALSE}
+alpha_vals <- seq(from = 0.0001, to = 2, by = 0.0001);
+par(mar = c(5, 5, 1, 1));
+g_m <- gamma_m(M = 1, beta = 1, alpha = alpha_vals, TF = 1);
+g_f <- gamma_f(M = 1, beta = 1, alpha = alpha_vals, TF = 1);
+plot(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
+     xlab = expression(paste("Nuptial gift search time (", alpha[1], ")")),
+     ylab = expression(paste("Fitness threshold (", gamma, ")")),
+     ylim = c(0, 4));
+points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25,
+     col = "black", lty = "solid");
+g_v <- which(g_f > g_m);
+g_w <- which(g_f <= g_m);
+polygon(x = c(alpha_vals[g_v], rev(alpha_vals[g_v]), rev(alpha_vals[g_v]), 
+              alpha_vals[g_v]), 
+        y = c(g_m[g_v], rev(g_f[g_v]), rev(g_f[g_v]), 
+              g_m[g_v]),
+        border = NA, col = "grey70");
+polygon(x = c(alpha_vals[g_w], rev(alpha_vals[g_w]), rev(alpha_vals[g_w]), 
+              alpha_vals[g_w]), 
+        y = c(g_m[g_w], rev(g_f[g_w]), rev(g_f[g_w]), 
+              g_m[g_w]),
+        border = NA, col = "grey20");
+bott <- rep(0, times = length(alpha_vals));
+topp <- c(g_m[g_v], g_f[g_w]);
+polygon(x = c(alpha_vals, rev(alpha_vals), rev(alpha_vals), alpha_vals), 
+        y = c(topp, rev(bott), rev(bott), topp),
+        border = NA, col = "grey90");
+points(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25);
+points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25);
+text(x = 1.5, y = 0.75, cex = 3, labels = "A");
+text(x = 0.4, y = 1, cex = 2, labels = "B");
+text(x = 1.9, y = 1.75, cex = 1.25, labels = "C", col = "white");
+text(x = 0.8, y = 3, cex = 4, labels = "D");
+```
+
+In the plot above, $\gamma_{m}$ and  $\gamma_{f}$ values are indicated by the sloping and horizontal lines, respectively, which divide the plot into four distinct zones (A-D). In zone A, $\gamma$ is too low relative to $\alpha_{1}$ for males to benefit from searching for nuptial gifts, and too low for females to benefit by being choosy. In zone B, $\gamma$ is sufficiently high relative to $\alpha_{1}$ for males to benefit from searching, but females do not benefit from being choosy. In zone C, males do not benefit from searching for nuptial gifts, but females would benefit from being choosy. Lastly, in zone D, we expect males to benefit from searching for nuptial gifts and for females to benefit by choosing only males that offer nuptial gifts.
+
+If we increase $M$ to a value of $M = 2$, then the slope at which $\gamma_{m}$ increases with increasing $\alpha_{1}$ increases, and the value of $\gamma_{f}$ decreases. The increased rate of interaction between females and males effectively decreases the area of parameter space in which males benefit from searching for nuptial gifts but females do not benefit from choosiness, and it increases the area of parameter space in which males benefit from searching and females benefit from being choosy. As $M$ increases further, zone B becomes smaller and zone C becomes larger, as the increased mating rate simultaneously increases the opportunity cost of males that search for nuptial gift and decreases the cost of female choosiness. Increasing $T_{F}$, however, does not affect the slope of $\gamma_{m}$ with $\alpha_{1}$, but it does lower $\gamma_{f}$, thereby increasing the size of zone D.
+
+```{r, echo = FALSE}
+alpha_vals <- seq(from = 0.0001, to = 2, by = 0.0001);
+par(mar = c(5, 5, 1, 1));
+g_m <- gamma_m(M = 2, beta = 1, alpha = alpha_vals, TF = 1);
+g_f <- gamma_f(M = 2, beta = 1, alpha = alpha_vals, TF = 1);
+plot(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
+     xlab = expression(paste("Nuptial gift search time (", alpha[1], ")")),
+     ylab = expression(paste("Fitness threshold (", gamma, ")")),
+     ylim = c(0, 4));
+points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25,
+     col = "black", lty = "solid");
+g_v <- which(g_f > g_m);
+g_w <- which(g_f <= g_m);
+polygon(x = c(alpha_vals[g_v], rev(alpha_vals[g_v]), rev(alpha_vals[g_v]), 
+              alpha_vals[g_v]), 
+        y = c(g_m[g_v], rev(g_f[g_v]), rev(g_f[g_v]), 
+              g_m[g_v]),
+        border = NA, col = "grey70");
+polygon(x = c(alpha_vals[g_w], rev(alpha_vals[g_w]), rev(alpha_vals[g_w]), 
+              alpha_vals[g_w]), 
+        y = c(g_m[g_w], rev(g_f[g_w]), rev(g_f[g_w]), 
+              g_m[g_w]),
+        border = NA, col = "grey20");
+bott <- rep(0, times = length(alpha_vals));
+topp <- c(g_m[g_v], g_f[g_w]);
+polygon(x = c(alpha_vals, rev(alpha_vals), rev(alpha_vals), alpha_vals), 
+        y = c(topp, rev(bott), rev(bott), topp),
+        border = NA, col = "grey90");
+points(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25, 
+       col = "blue");
+points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25, 
+       col = "red");
+text(x = 1, y = 0.4, cex = 3, labels = "A");
+text(x = 0.1, y = 0.5, cex = 1, labels = "B");
+text(x = 1.75, y = 2, cex = 4, labels = "C", col = "white");
+text(x = 0.4, y = 3, cex = 5, labels = "D");
+arrows(x0 = alpha_vals[15000], x1 = alpha_vals[13800], col = "blue",
+       y0 = g_m[15000], y1 = 3.5, length = 0.1, lwd = 2);
+text(x = alpha_vals[13600], y = 3.65, labels = "M", col = "blue");
+arrows(x0 = alpha_vals[15000], x1 = alpha_vals[15000], col = "red",
+       y0 = g_f[15000], y1 = 0.5, length = 0.1, lwd = 2);
+text(x = alpha_vals[15000], y = 0.3, labels = "M", col = "red");
+arrows(x0 = alpha_vals[18000], x1 = alpha_vals[18000], col = "red",
+       y0 = g_f[18000], y1 = 0.5, length = 0.1, lwd = 2);
+text(x = alpha_vals[18000], y = 0.3, labels = expression(T[F]), col = "red");
+# Make an arrow perpendicular to the slope indicating effect of M
+# Arrow goes down to indicate what happens for gamma_f with M
+# Arrow goes down to indicate what happens for gamma_f with TF
+```
+
+
+
+
 
 
 Evolution of nuptial gift giving
