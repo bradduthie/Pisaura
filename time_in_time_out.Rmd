@@ -258,7 +258,7 @@ optMF <- W_m(mom = 1, mim = 1, mof = 1, mif = 1, M = 1, TF = 1, gamma = 1/2,
              a1 = 1/16, a2 = Inf, beta = 1, TM = TmOpt);
 ```
 
-To model the evolution of nuptial gift giving from an ancestral state in which no nuptial gifts are provided, we first evaluate male fitness for an initial set of conditions. We assume that males first evolve optimal search time for nuptial gifts, then that females will evolve to accept or reject males without gifts. Evolved female choosiness can subsequently alter male fitness. We thereby simulate the evolution of male nuptial gift search and female choice. We do this first assuming that males do not search for fake nuptial gifts (setting $\alpha_{2} = \infty$), determining the dynamics of $T_{m}$ when only real nuptial gifts are provided before introducing fake nuptial gifts as an option for males.
+To model the evolution of nuptial gift giving from an ancestral state in which no nuptial gifts are provided, we first evaluate male fitness for an initial set of conditions. We assume that males first evolve optimal search time for nuptial gifts, then that females will evolve to accept or reject males without gifts. Evolved female choosiness can subsequently alter male fitness. We thereby simulate the evolution of male nuptial gift search and female choice. We do this first assuming that males do not search for fake nuptial gifts (setting $\alpha_{2} = \infty$ so $\Pr(F) = 0$), determining the dynamics of $T_{m}$ when only real nuptial gifts are provided before introducing fake nuptial gifts as an option for males.
 
 For male fitness, given that the condition $\gamma > \alpha_{1}(M / \sqrt{\beta})$ is fulfilled, fitness will peak at some positive value of $T_{m}$. For illustration, we first select values $M = 1$, $\beta = 1$, $\alpha_{1} = 1/16$, and $\gamma = 1/2$. Under these conditions, we can find the value of $W_{m}$ across $T_{m}$ to determine its optimal value, $T^{*}_{m}$. Using a squeeze algorithm, we find $T^{*}_{m} = `r TmOpt`$, as indicated by the point in Figure 1.
 
@@ -307,6 +307,28 @@ points(x = optTm, y = dmalefit[mxfit], pch = 20);
 
 
 \clearpage
+
+An alternative to all of this is to compare the fitness of a male that does versus does not go for a nuptial gift. Then calculate expected fitness as time out expected to get the nuptial gift versus no time out. Note,
+
+$$\int_{0}^{\infty}e^{- \frac{1}{\alpha_{1}}T_{m}} = \alpha_{1}.$$
+
+This means that $E[T_{m}] = \alpha_{1}$ for finding a nuptial gift. The fitness of a male that finds a nuptial gift is therefore,
+
+$$W_{m,G} = \frac{1 + \gamma}{\alpha_{1} + \frac{\sqrt{\beta}}{M}}.$$
+
+$$W_{m,F} = \frac{1}{\alpha_{2} + \frac{\sqrt{\beta}}{M}}.$$
+
+$$W_{m,L} = \frac{1}{\frac{\sqrt{\beta}}{M}} = \frac{1}{M\sqrt{\beta}}.$$
+
+This would suggest that finding a nuptial gift is higher fitness if,
+
+$$\gamma > \frac{\frac{\alpha_{1}}{\sqrt{\beta}} + \frac{1}{M}}{M} - 1.$$
+
+Or if,
+
+$$\alpha_{1} > \left( M\left(1 + \gamma \right) - \frac{1}{M} \right)\sqrt{\beta}.$$
+
+This is nice, and probably worth a deeper look.
 
 
 Second derivative of fitness
