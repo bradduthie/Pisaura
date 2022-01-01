@@ -176,9 +176,9 @@ $$\Pr(n) = 1 - e^{-T_{N} (M \sqrt{\beta}) \Pr(L)}.$$
 
 Note that $\Pr(g)$ and $\Pr(n)$ need not sum to unity, and if $\Pr(L)$ is sufficiently low, then finding a male with a gift will be easier than finding a male without one (i.e., $\Pr(g) > \Pr(n)$).
 
-For simplicity, we assume that offspring sired by a giftless male have a fitness of $1$, so offspring sired by males providing gifts have a fitness of $1 + \gamma$. The inclusive fitness of a female whose offspring are sired by a giftless male is therefore $W_{f}(n) = \kappa (1/2)$, where $\kappa$ is total number of offspring. For simply, we assume $\kappa = 1$, meaning that female fitness is $W_{f}(n) = 1/2$. The inclusive fitness of a female whose offspring are sired by a male with a gift is then,
+For simplicity, we assume that offspring sired by a giftless male have a fitness of $1$, so offspring sired by males providing gifts have a fitness of $1 + \gamma$. The inclusive fitness of a female whose offspring are sired by a giftless male is therefore $W_{f}(n) = \kappa (1/2)$, where $\kappa$ is total number of offspring. For simply, we assume $\kappa = 2$, meaning that female fitness is $W_{f}(n) = 1$. The inclusive fitness of a female whose offspring are sired by a male with a gift is then,
 
-$$W_{f}(g) = \frac{1}{2}\left(1 + \gamma\frac{\Pr(G)}{\Pr(G) + \Pr(F)}\right).$$
+$$W_{f}(g) = 1 + \gamma\frac{\Pr(G)}{\Pr(G) + \Pr(F)}.$$
 That is, the fitness increment $\gamma$ multiplied by the probability that a male's gift is true.
 
 We can now ask a relevant question for female fitness. Under what conditions should she reject a giftless male? Females will have a higher fitness when they reject a giftless male if $W_{f}(g)$ exceeds $W_{f}(n)$ after accounting for the opportunity cost associated with the additional search time spent in the mating pool $T_{N}$,
@@ -273,6 +273,51 @@ points(x = TmOpt, y = optMF, pch = 20, col = "black");
 ```
 
 
+
+Given $T^{*}_{m} = `r TmOpt`$, we can now calculate $\Pr(G) = `r PrGf(Tm = TmOpt, a1 = 1/16)`$ and $\Pr(L) = `r PrLf(Tm = TmOpt, a1 = 1/16, a2 = Inf)`$. We can then feed 
+
+
+
+
+
+
+
+
+
+
+
+
+\clearpage
+
+An alternative model of male behaviour
+=============================================
+
+Up until now, we have assumed that males invest a fixed amount of time $T_{m}$ in the time-out phase searching for nuptial gifts. While this simplifying assumption is unlikely to be problematic for determining the initial evolution of nuptial gift searching behaviour ($\partial W_{m} / \partial T_{m}$), it might not reflect the strategy of males in real systems. For example, instead of spending a fixed amount of time in time-out phase, males might instead to select one of two strategies; either search or do not search for a nuptial gift. Males with the former strategy might simply continue to search until a nuptial gift is found, while males that do not search will simply re-enter the mating pool. In this case, time searching for a nuptial gift will come at the cost of mating opportunities, but might increase the fitness of offspring. We therefore need to model the expected length of time $E[T_{m}]$ spent outside of the mating pool for males that search for nuptial gifts, which is simply $\alpha_{1}$. Note that we can integrate search time $t$ over the rate at which nuptial gifts are encountered ($\exp(-1/\alpha_{1})$) to show $E[T_{m}] = \alpha_{1}$,
+
+$$\int_{0}^{\infty}e^{- \frac{1}{\alpha_{1}}t}dt = \alpha_{1}.$$
+
+The rate at which a focal male that searches for a nuptial gift increases his fitness is therefore fitness of offspring $(1 + \gamma)$ divided by expected time spent searching for a nuptial gift ($\alpha_{1}$) plus time spent in the mating pool ($\sqrt{\beta} / M$),
+
+$$W_{m,G} = \frac{1 + \gamma}{\alpha_{1} + \frac{\sqrt{\beta}}{M}}.$$
+
+In contrast, a male that does not search for a nuptial gift has offspring with lower fitness, but spends less time outside of the mating pool,
+
+$$W_{m,L} = \frac{1}{\left(\frac{\sqrt{\beta}}{M}\right)} = \frac{M}{\sqrt{\beta}}.$$
+
+We can then determine the conditions for which $W_{m,G} > W_{m,L}$, isolating $\gamma$ to find how large of a fitness benefit must be provided by the nuptial gift to make the search cost worthwhile,
+
+$$\gamma > \frac{\alpha_{1}M}{\sqrt{\beta}}.$$
+Note that this is the exact same inequality that we obtained when assuming the initial condition $T_{M} = 0$ and evaluating $\partial W_{m} / \partial T_{m}$. If $M = 1$ and $\beta = 1$, then we get the elegant $\gamma > \alpha_{1}$. That is, the inclusive fitness increase must be greater than the time spent searching for a nuptial gift. As the interaction rate $M$ increases, the fitness benefit must be even higher to compensate for the opportunity cost of being able to enter the mating pool early by not searching for a nuptial gift.
+
+
+
+\clearpage
+
+
+
+Notes and old text
+==============================
+
 <!--- 
 
 Derivative of W with respect to T
@@ -292,49 +337,7 @@ points(x = optTm, y = dmalefit[mxfit], pch = 20);
 
 --->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\clearpage
-
-An alternative to all of this is to compare the fitness of a male that does versus does not go for a nuptial gift. Then calculate expected fitness as time out expected to get the nuptial gift versus no time out. Note,
-
-$$\int_{0}^{\infty}e^{- \frac{1}{\alpha_{1}}T_{m}} = \alpha_{1}.$$
-
-This means that $E[T_{m}] = \alpha_{1}$ for finding a nuptial gift. The fitness of a male that finds a nuptial gift is therefore,
-
-$$W_{m,G} = \frac{1 + \gamma}{\alpha_{1} + \frac{\sqrt{\beta}}{M}}.$$
-
-$$W_{m,F} = \frac{1}{\alpha_{2} + \frac{\sqrt{\beta}}{M}}.$$
-
-$$W_{m,L} = \frac{1}{\frac{\sqrt{\beta}}{M}} = \frac{1}{M\sqrt{\beta}}.$$
-
-This would suggest that finding a nuptial gift is higher fitness if,
-
-$$\gamma > \frac{\frac{\alpha_{1}}{\sqrt{\beta}} + \frac{1}{M}}{M} - 1.$$
-
-Or if,
-
-$$\alpha_{1} > \left( M\left(1 + \gamma \right) - \frac{1}{M} \right)\sqrt{\beta}.$$
-
-This is nice, and probably worth a deeper look.
-
-
-Second derivative of fitness
-==============================
-
-Second derivative of fitness with respect to search time,
+**I am just leaving this in here for now**. Second derivative of fitness with respect to search time,
 
 $$\frac{\partial^2 W_{m}}{\partial T_{m}^2} = \frac{\frac{2\left(1 + \gamma\left(1 - \frac{1 + \frac{\frac{\sqrt{\beta}}{M} + T_{m}}{\alpha_{1}}}{e^{\frac{1}{\alpha_{1}}T_{m}}}\right)\right)}{\left(T_{m} + \frac{\sqrt{\beta}}{M}\right)^{2}} - \frac{\gamma}{\alpha_{1}^{2}e^{\frac{1}{\alpha_{1}}T_{m}}}}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
 <!---
