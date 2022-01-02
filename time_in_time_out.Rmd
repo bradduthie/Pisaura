@@ -1,7 +1,7 @@
 ---
 title: "A time-in time-out model"
-author: "Brad Duthie"
-date: "31/12/2021"
+author: "Anders Poulsen Charmouth, Brad Duthie"
+date: "02 January 2022"
 output: pdf_document
 bibliography: refs.bib
 ---
@@ -12,13 +12,13 @@ Model
 
 We use a time-in and time-out model in which females and males spend some period of time searching for a mate (time-in) followed by a period of cool down outside the mating pool (time-out).
 
-After mating, we assume that females must spend some time processing offspring ($T_{f}$). Male time to replenish sperm is negligible, but males can spend time out of the mating pool to search for (fake or real) nuptial gifts. When males return from time out, they encounter females with some probability that is a function of the encounter rate between opposite sex conspecifics ($M$) and the sex ratio ($\beta$; males:females). Mortality occurs for females in ($\mu_{if}$) and out ($\mu_{of}$) of the mating pool, and for males in ($\mu_{im}$) and out ($\mu_{om}$) of the mating pool. First, we describe the fitness consequences of male search time for a nuptial gifts. We then describe the fitness consequences of female choice to accept or reject males based on their provision of a nuptial gift. 
+After mating, we assume that females must spend some time processing offspring ($T_{f}$). Male time to replenish sperm is negligible, but males can spend time out of the mating pool to search for a nuptial gift. When males return from time out, they encounter females with some probability that is a function of the encounter rate between opposite sex conspecifics ($M$) and the sex ratio ($\beta$; males:females). Mortality occurs for females in ($\mu_{if}$) and out ($\mu_{of}$) of the mating pool, and for males in ($\mu_{im}$) and out ($\mu_{om}$) of the mating pool. First, we describe the fitness consequences of male search time for a nuptial gifts. We then describe the fitness consequences of female choice to accept or reject males based on their provision of a nuptial gift. 
 
 
 Male fitness
 ----------------------------
 
-During time-out, males search for a nuptial gift for a time period of $T_{m}$. Males must spend the full $T_{m}$ in the time-out phase, even if they succeed in finding a nuptial gift. The probability that a male obtains a true nuptial gift ($G$) during this time is modelled as,
+During time-out, males search for a nuptial gift for a time period of $T_{m}$. Initially, we assume that males must spend the full $T_{m}$ in the time-out phase, even if they succeed in finding a nuptial gift. The probability that a male obtains a true nuptial gift ($G$) during this time is modelled as,
 
 $$\Pr(G) = 1 - e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
 ```{r, echo = FALSE}
@@ -29,7 +29,7 @@ PrGf <- function(Tm, a1){
 ```
 
 
-In the above, $\alpha_{1}$ is the amount of time expected to pass before a male encounters a nuptial gift. 
+In the above, $\alpha_{1}$ is the amount of time expected to pass before a male encounters a nuptial gift. We assume that a male will only enter the mating pool with no gift if they are unsuccessful in obtaining gift, so the probability that a male obtains no gift after $T_{m}$ is modelled as,
 
 ```{r, echo = FALSE}
 PrFf <- function(Tm, a1, a2 = Inf){
@@ -38,7 +38,7 @@ PrFf <- function(Tm, a1, a2 = Inf){
 }
 ```
 
-Similarly, we assume that a male will only enter the mating pool with no gift if they are unsuccessful in obtaining gift, so the probability that a male obtains no gift after $T_{m}$ is modelled as,
+
 
 $$\Pr(L) = e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
 
@@ -49,7 +49,7 @@ PrLf <- function(Tm, a1, a2 = Inf){
 }
 ```
 
-For simplicity, we assume that the fitness increments associated with nuptial gift versus no nuptial gift are $V_{G} = 1 + \gamma$ and $V_{L} = 1$, respectively. Male fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
+For simplicity, we assume that the fitness increments to offspring associated with nuptial gift versus no nuptial gift are $V_{G} = 1 + \gamma$ and $V_{L} = 1$, respectively. The rate at which males increase their fitness can then be defined as the expected fitness increment from their nuptial gift search divided by $T_{m}$ plus the time spent in the mating pool waiting to encounter a mate,
 
 
 $$W_{m} = \frac{\Pr(G)(1 + \gamma) + \Pr(L)}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
@@ -149,7 +149,7 @@ dWdT_check <- function(gamma, beta = 1, M = 100, a1 = 1){
 }
 ```
 
-The above equation makes intuitive sense. First note, trivially, that if the interaction rate is $M = 0$, then no change in fitness occurs (since females and males cannot mate). The change in fitness caused by searching for nuptial gifts is increased when $\gamma$ is high, scaled by the search time needed to find a nuptial gift (recall that $Pr(G)$ decreases with increasing $\alpha_{1}$). From this first term, a second term is subtracted that reflects a loss in fitness proportional to the encounter rate of potential mates in the mating pool. We can identify the conditions under which male inclusive fitness increases by searching for a nuptial gift by setting $\partial W_{m} / \partial T_{m} = 0$ and solve for $\gamma$, 
+The above equation makes intuitive sense. First note, trivially, that if the interaction rate is $M = 0$, then no change in fitness occurs (since females and males cannot mate). The change in fitness caused by searching for nuptial gifts is increased when $\gamma$ is high, scaled by the search time needed to find a nuptial gift (recall that $Pr(G)$ decreases with increasing $\alpha_{1}$). From this first term, a second term is subtracted that reflects a loss in fitness proportional to the encounter rate of potential mates in the mating pool. We can identify the conditions under which male inclusive fitness increases by searching for a nuptial gift by setting $\partial W_{m} / \partial T_{m} = 0$ and solving for $\gamma$, 
 
 $$\gamma_{m} > \alpha_{1}\frac{M}{\sqrt{\beta}}.$$
 
@@ -172,7 +172,7 @@ $$W_{m,L} = \frac{1}{\left(\frac{\sqrt{\beta}}{M}\right)} = \frac{M}{\sqrt{\beta
 
 We can then determine the conditions for which $W_{m,G} > W_{m,L}$, isolating $\gamma$ to find how large of a fitness benefit must be provided by the nuptial gift to make the search cost worthwhile,
 
-$$\gamma_{m} > \frac{\alpha_{1}M}{\sqrt{\beta}}.$$
+$$\gamma_{m} > \alpha_{1}\frac{M}{\sqrt{\beta}}.$$
 
 Recall that this is the exact same inequality that we obtained when assuming the initial condition $T_{M} = 0$ and evaluating $\partial W_{m} / \partial T_{m}$. If $M = 1$ and $\beta = 1$, then we get the elegant $\gamma > \alpha_{1}$. That is, the inclusive fitness increase must be greater than the time spent searching for a nuptial gift. As the interaction rate $M$ increases, the fitness benefit must be even higher to compensate for the opportunity cost of being able to enter the mating pool early by not searching for a nuptial gift.
 
@@ -181,9 +181,7 @@ Recall that this is the exact same inequality that we obtained when assuming the
 Female fitness
 ----------------------------
 
-During time-out, females process offspring over a duration of $T_{f}$. When females re-enter the mating pool, they will then encounter males at a rate of $M\sqrt{\beta}$. We assume that female offspring receive a fitness increment of $\gamma \geq 0$ from males that provide a true nuptial gift. Female fitness therefore never decreases by mating with a male with a nuptial gift versus a male without one. Therefore, if a female encounters a male with a nuptial gift, we assume that she will mate with him. But if a female encounters a male with no nuptial gift, then she might accept or reject the male. If she rejects the male, then she will remain in the mating pool.
-
-We model the probability that a female encounters a male with a nuptial gift after a duration of $T_{N}$ in the mating pool as,
+During time-out, females process offspring over a duration of $T_{f}$ (we assume that $T_{f} > \alpha_{1}$, else females are no longer the choosy sex). When females re-enter the mating pool, they will then encounter males at a rate of $M\sqrt{\beta}$. We assume that female offspring receive a fitness increment of $\gamma \geq 0$ from males that provide a true nuptial gift. Female fitness therefore never decreases by mating with a male with a nuptial gift versus a male without one. Therefore, if a female encounters a male with a nuptial gift, we assume that she will mate with him. But if a female encounters a male with no nuptial gift, then she might accept or reject the male. If she rejects the male, then she will remain in the mating pool. We model the probability that a female encounters a male with a nuptial gift after a duration of $T_{N}$ in the mating pool as,
 
 $$\Pr(g) = 1 - e^{-T_{N}\left( M \sqrt{\beta}\right) \Pr(G)}.$$
 
@@ -191,9 +189,7 @@ We can similarly model the probability that a female encounters a giftless male 
 
 $$\Pr(n) = 1 - e^{-T_{N} (M \sqrt{\beta}) \Pr(L)}.$$
 
-Note that $\Pr(g)$ and $\Pr(n)$ need not sum to unity, and if $\Pr(L)$ is sufficiently low, then finding a male with a gift will be easier than finding a male without one (i.e., $\Pr(g) > \Pr(n)$). Also note that the expected time spent in the mating pool before a focal female encounters a male with a gift will be $1 / (\Pr(G) \times M \sqrt{\beta})$, while the expected time spent in the mating pool before a focal female encounters any male will be $1 / (M \sqrt{\beta})$ (since $\Pr(G) + \Pr(L) = 1$). We can use this to determine the rate at which a female increases her fitness when she is choosy and mates only with males that have gifts versus when she is not choosy and mates with the first male she encounters.
-
-The rate at which a female increases her fitness by being choosy and mating only when she encounters a male with a gift is as follows,
+Note that $\Pr(g)$ and $\Pr(n)$ need not sum to unity, and if $\Pr(L)$ is sufficiently low, then finding a male with a gift will be easier than finding a male without one (i.e., $\Pr(g) > \Pr(n)$). Also note that the expected time spent in the mating pool before a focal female encounters a male with a gift will be $1 / (\Pr(G) \times M \sqrt{\beta})$, while the expected time spent in the mating pool before a focal female encounters any male will be $1 / (M \sqrt{\beta})$ (since $\Pr(G) + \Pr(L) = 1$). We can use this to determine the rate at which a female increases her fitness when she is choosy and mates only with males that have gifts versus when she is not choosy and mates with the first male she encounters. The rate at which a female increases her fitness by being choosy and mating only when she encounters a male with a gift is as follows,
 
 $$W_{f}(g) = \frac{1 + \gamma}{T_{F} + \left(\frac{1}{\Pr(G) \times M \sqrt{\beta}}\right)}.$$
 
@@ -217,16 +213,16 @@ Under the above conditions in which the fitness increase caused by the nuptial g
 Male nuptial search and female choosiness
 -------------------------------------------
 
-We can now investigate the values of $\gamma_{m}$ and  $\gamma_{f}$ across parameter space. First, we look across values of $\alpha_{1}$ given fixed values of  $M = 1$, $\beta = 1$, $\alpha_{1} = 1/16$, and $T_{F} = 1$. Note that expected male search time for a nuptial gift will be $T_{M} = \alpha_{1}$, meaning that $exp(T_{m} / \alpha_{1}) = e$.
+We can now investigate the values of $\gamma_{m}$ and  $\gamma_{f}$ across parameter space. First, we look across values of $\alpha_{1}$ given fixed values of  $M = 1$, $\beta = 1$, and $T_{F} = 2$. Note that expected male search time for a nuptial gift will be $T_{M} = \alpha_{1}$, meaning that $\exp(T_{m} / \alpha_{1}) = e$.
 
 ```{r, echo = FALSE}
-gamma_m <- function(M = 1, beta = 1, alpha = 1/16, TF = 1){
+gamma_m <- function(M = 1, beta = 1, alpha = 1/16, TF = 2){
   return(alpha * (M / sqrt(beta)));
 }
 ```
 
 ```{r, echo = FALSE}
-gamma_f <- function(M = 1, beta = 1, alpha = 1/16, TF = 1){
+gamma_f <- function(M = 1, beta = 1, alpha = 1/16, TF = 2){
   topp <- exp(alpha / alpha);
   bott <- TF * M * sqrt(beta) * (exp(alpha/alpha) - 1);
   return(topp/bott);
@@ -234,15 +230,15 @@ gamma_f <- function(M = 1, beta = 1, alpha = 1/16, TF = 1){
 ```
 
 
-```{r, echo = FALSE}
-alpha_vals <- seq(from = 0.0001, to = 2, by = 0.0001);
+```{r, echo = FALSE, fig.cap = "Parameter space in which males do not search for nuptial gifts and females are not choosy (A), males search but females are not choosy (B), females would be choosy but males do not search (C), and males search and females are choosy (D)."}
+alpha_vals <- seq(from = 0.0001, to = 1.2, by = 0.0001);
 par(mar = c(5, 5, 1, 1));
-g_m <- gamma_m(M = 1, beta = 1, alpha = alpha_vals, TF = 1);
-g_f <- gamma_f(M = 1, beta = 1, alpha = alpha_vals, TF = 1);
+g_m <- gamma_m(M = 1, beta = 1, alpha = alpha_vals, TF = 2);
+g_f <- gamma_f(M = 1, beta = 1, alpha = alpha_vals, TF = 2);
 plot(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
      xlab = expression(paste("Nuptial gift search time (", alpha[1], ")")),
      ylab = expression(paste("Fitness threshold (", gamma, ")")),
-     ylim = c(0, 4));
+     ylim = c(0, 1.5));
 points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25,
      col = "black", lty = "solid");
 g_v <- which(g_f > g_m);
@@ -264,25 +260,25 @@ polygon(x = c(alpha_vals, rev(alpha_vals), rev(alpha_vals), alpha_vals),
         border = NA, col = "grey90");
 points(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25);
 points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25);
-text(x = 1.5, y = 0.75, cex = 3, labels = "A");
-text(x = 0.4, y = 1, cex = 2, labels = "B");
-text(x = 1.9, y = 1.75, cex = 1.25, labels = "C", col = "white");
-text(x = 0.8, y = 3, cex = 4, labels = "D");
+text(x = 0.75, y = 0.35, cex = 3, labels = "A");
+text(x = 0.15, y = 0.45, cex = 2, labels = "B");
+text(x = 1.1, y = 0.95, cex = 2, labels = "C", col = "white");
+text(x = 0.4, y = 1.25, cex = 4, labels = "D");
 ```
 
-In the plot above, $\gamma_{m}$ and  $\gamma_{f}$ values are indicated by the sloping and horizontal lines, respectively, which divide the plot into four distinct zones (A-D). In zone A, $\gamma$ is too low relative to $\alpha_{1}$ for males to benefit from searching for nuptial gifts, and too low for females to benefit by being choosy. In zone B, $\gamma$ is sufficiently high relative to $\alpha_{1}$ for males to benefit from searching, but females do not benefit from being choosy. In zone C, males do not benefit from searching for nuptial gifts, but females would benefit from being choosy. Lastly, in zone D, we expect males to benefit from searching for nuptial gifts and for females to benefit by choosing only males that offer nuptial gifts.
+In Figure 1, $\gamma_{m}$ and  $\gamma_{f}$ values are indicated by the sloping and horizontal lines, respectively, which divide the plot into four distinct zones (A-D). In zone A, $\gamma$ is too low relative to $\alpha_{1}$ for males to benefit from searching for nuptial gifts, and too low for females to benefit by being choosy. In zone B, $\gamma$ is sufficiently high relative to $\alpha_{1}$ for males to benefit from searching, but females do not benefit from being choosy. In zone C, males do not benefit from searching for nuptial gifts, but females would benefit from being choosy. Lastly, in zone D, we expect males to benefit from searching for nuptial gifts and for females to benefit by choosing only males that offer nuptial gifts. Note that it is tempting to suggest that zone C is where we might expect male searching for fake nuptial gifts to evolve, but in this zone, no males actually benefit from procuring a nuptial gift. Hence, nuptial gifts should be only fake in zone C, eroding the benefit of female choosiness. Consequently, we could conclude that fake nuptial gift giving should evolve and persist only in zone D, with subsequent effects on $\beta$ (due to more males being in time out) that might affect $\gamma_{f}$.
 
 If we increase $M$ to a value of $M = 2$, then the slope at which $\gamma_{m}$ increases with increasing $\alpha_{1}$ increases, and the value of $\gamma_{f}$ decreases. The increased rate of interaction between females and males effectively decreases the area of parameter space in which males benefit from searching for nuptial gifts but females do not benefit from choosiness, and it increases the area of parameter space in which males benefit from searching and females benefit from being choosy. As $M$ increases further, zone B becomes smaller and zone C becomes larger, as the increased mating rate simultaneously increases the opportunity cost of males that search for nuptial gift and decreases the cost of female choosiness. Increasing $T_{F}$, however, does not affect the slope of $\gamma_{m}$ with $\alpha_{1}$, but it does lower $\gamma_{f}$, thereby increasing the size of zone D.
 
-```{r, echo = FALSE}
-alpha_vals <- seq(from = 0.0001, to = 2, by = 0.0001);
+```{r, echo = FALSE, fig.cap = "Areas of parameter space in which males do not search for nuptial gifts and females are not choosy (A), males search but females are not choosy (B), females would be choosy but males do not search (C), and males search and females are choosy (D). Arrows indicate the effect of increasing interaction rate (M) and female time-out (T_F)"}
+alpha_vals <- seq(from = 0.0001, to = 1.2, by = 0.0001);
 par(mar = c(5, 5, 1, 1));
-g_m <- gamma_m(M = 2, beta = 1, alpha = alpha_vals, TF = 1);
-g_f <- gamma_f(M = 2, beta = 1, alpha = alpha_vals, TF = 1);
+g_m <- gamma_m(M = 2, beta = 1, alpha = alpha_vals, TF = 2);
+g_f <- gamma_f(M = 2, beta = 1, alpha = alpha_vals, TF = 2);
 plot(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
      xlab = expression(paste("Nuptial gift search time (", alpha[1], ")")),
      ylab = expression(paste("Fitness threshold (", gamma, ")")),
-     ylim = c(0, 4));
+     ylim = c(0, 1.5));
 points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25,
      col = "black", lty = "solid");
 g_v <- which(g_f > g_m);
@@ -306,19 +302,19 @@ points(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
        col = "blue");
 points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25, 
        col = "red");
-text(x = 1, y = 0.4, cex = 3, labels = "A");
-text(x = 0.1, y = 0.5, cex = 1, labels = "B");
-text(x = 1.75, y = 2, cex = 4, labels = "C", col = "white");
-text(x = 0.4, y = 3, cex = 5, labels = "D");
-arrows(x0 = alpha_vals[15000], x1 = alpha_vals[13800], col = "blue",
-       y0 = g_m[15000], y1 = 3.5, length = 0.1, lwd = 2);
-text(x = alpha_vals[13600], y = 3.65, labels = "M", col = "blue");
-arrows(x0 = alpha_vals[15000], x1 = alpha_vals[15000], col = "red",
-       y0 = g_f[15000], y1 = 0.5, length = 0.1, lwd = 2);
-text(x = alpha_vals[15000], y = 0.3, labels = "M", col = "red");
-arrows(x0 = alpha_vals[18000], x1 = alpha_vals[18000], col = "red",
-       y0 = g_f[18000], y1 = 0.5, length = 0.1, lwd = 2);
-text(x = alpha_vals[18000], y = 0.3, labels = expression(T[F]), col = "red");
+text(x = 0.8, y = 0.2, cex = 3, labels = "A");
+text(x = 0.05, y = 0.3, cex = 2, labels = "B");
+text(x = 1, y = , cex = 4, labels = "C", col = "white");
+text(x = 0.2, y = 1.1, cex = 5, labels = "D");
+arrows(x0 = alpha_vals[5500], x1 = alpha_vals[4800], col = "blue",
+       y0 = g_m[5500], y1 = 1.2, length = 0.1, lwd = 2);
+text(x = alpha_vals[4550], y = 1.24, labels = "M", col = "blue");
+arrows(x0 = alpha_vals[5000], x1 = alpha_vals[5000], col = "red",
+       y0 = g_f[5000], y1 = 0.25, length = 0.1, lwd = 2);
+text(x = alpha_vals[5000], y = 0.2, labels = "M", col = "red");
+arrows(x0 = alpha_vals[4000], x1 = alpha_vals[4000], col = "red",
+       y0 = g_f[4000], y1 = 0.25, length = 0.1, lwd = 2);
+text(x = alpha_vals[4000], y = 0.2, labels = expression(T[F]), col = "red");
 # Make an arrow perpendicular to the slope indicating effect of M
 # Arrow goes down to indicate what happens for gamma_f with M
 # Arrow goes down to indicate what happens for gamma_f with TF
