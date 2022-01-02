@@ -609,18 +609,60 @@ We assume that the sex ratio at maturation is unity (i.e., equal number of males
 $$\beta = \frac{\int_{t = 0}^{\infty} P_{IM}(t)dt}{\int_{t = 0}^{\infty} P_{IF}(t)dt}.$$
 In the above, $P_{IM}(t)$ and $P_{IF}(t)$ are the probabilities of finding a male and female in 'time in', respectively. @Kokko2001 find these probabilities in terms of the cost of mating. For our purpose, we can find the probability of find a male in 'time in' as the time spent in the mating pol waiting to encounter females ($\sqrt{\beta} / M$) divided by total time in and out,
 
+$$P_{IM}(t) = \frac{\left(\frac{\sqrt{\beta}}{M}\right)}{T_{M} + \left(\frac{\sqrt{\beta}}{M}\right)}.$$
+
+<!---
+
 $$P_{IM}(t) = \frac{\frac{\sqrt{M}}{\beta}}{T_{m} + \frac{\sqrt{M}}{\beta}}.$$
+--->
+
 We can define $P_{IF}(t)$ similarly,
 
+$$P_{IF}(t) = \frac{ \left( \frac{1}{M\sqrt{\beta}} \right)  }{ T_{F} + \left( \frac{1}{M\sqrt{\beta}} \right)}.$$
+
+<!---
+
 $$P_{IF}(t) = \frac{M\sqrt{\beta}}{T_{F} + M\sqrt{\beta}}.$$
+--->
+
 
 We therefore can define $\beta$ as below,
 
+$$\beta = \frac{\frac{\left(\frac{\sqrt{\beta}}{M}\right)}{T_{M} + \left(\frac{\sqrt{\beta}}{M}\right)}}{\frac{ \left( \frac{1}{M\sqrt{\beta}} \right)  }{ T_{F} + \left( \frac{1}{M\sqrt{\beta}} \right)}}.$$
+
+<!---
+
 $$\beta = \frac{\frac{\frac{\sqrt{M}}{\beta}}{T_{m} + \frac{\sqrt{M}}{\beta}}}{\frac{M\sqrt{\beta}}{T_{F} + M\sqrt{\beta}}}.$$
+--->
+
 
 The above can be simplified,
 
+$$\beta = \frac{\beta T_{F} M + \sqrt{\beta}}{T_{M}M + \sqrt{\beta} }.$$
+
+A closed form solution for the above equation can be found,
+
+$$\beta = \frac{1}{2}\left(\left(M \left( T_{F} - T_{M} \right)\right)^{2} \pm \left(\left(M \left(T_{F} - T_{M} \right) \right)^{4} + 4 \left(M \left(T_{F} - T_{M} \right)\right)^{2} \right)^\frac{1}{2}\right) + 1.$$
+
+
+
+<!---
+
+
+This has two solutions,
+
+$$\beta = \frac{1}{2} \left(\left(\left(M\left(T_{F} - T_{M}\right)\right)^{4} + 4\left(M\left(T_{F} - T_{M}\right) \right)^{2} \right)^{\frac{1}{2}} + \left(M\left(T_{F} - T_{M}\right)\right)^{2}\right) + 1$$
+
+And
+
+$$\beta = \frac{1}{2}\left(\left(M \left( T_{F} - T_{M} \right)\right)^{2} - \left(\left(M \left(T_{F} - T_{M} \right) \right)^{4} + 4 \left(M \left(T_{F} - T_{M} \right)\right)^{2} \right)^\frac{1}{2}\right) + 1.$$
+--->
+
+<!---
+
 $$\beta = \frac{T_{F}\sqrt{\beta} + \beta M}{T_{M}\beta^{2}\sqrt{M} + \beta M}.$$
+
+--->
 
 Note that the equation is recursive, so we need to figure out a closed form solution if possible by figuring out the pattern. Note that this equation makes some intuitive sense. The value of $\beta$ increases with higher female time out ($T_{F}$) and decreases with higher male time out ($T_{M}$). If $T_{F} = T_{M} = 0$, then we have $\beta = 0$; note that @Kokko2001 also multiplied the whole thing by a constant representing sex ratio upon reproductive maturity.
 
