@@ -14,6 +14,30 @@ We use a time-in and time-out model in which females and males spend some period
 
 After mating, we assume that females must spend some time processing offspring ($T_{f}$). Male time to replenish sperm is negligible, but males can spend time out of the mating pool to search for a nuptial gift. When males return from time out, they encounter females with some probability that is a function of the encounter rate between opposite sex conspecifics ($M$) and the sex ratio ($\beta$; males:females). Mortality occurs for females in ($\mu_{if}$) and out ($\mu_{of}$) of the mating pool, and for males in ($\mu_{im}$) and out ($\mu_{om}$) of the mating pool. First, we describe the fitness consequences of male search time for a nuptial gifts. We then describe the fitness consequences of female choice to accept or reject males based on their provision of a nuptial gift. 
 
+```{r, echo = FALSE}
+calc_beta <- function(M = 1, TF = 1, TM = 1){
+  term1 <-   (M * (TF - TM))^2;
+  term2 <-   (M * (TF - TM))^4;
+  term3 <- 4*(M * (TF - TM))^2;
+  ttrm  <- (term2 + term3)^(1/2);
+  sol1  <- 0.5 * (term1 - ttrm) + 1;
+  sol2  <- 0.5 * (term1 + ttrm) + 1;
+  if(TF > TM){
+    beta = max(c(sol1, sol2));
+  }else{
+    beta = min(c(sol1, sol2));
+  }
+  return(list = c(beta = beta, solution1 = sol1, solution2 = sol2));
+}
+get_beta <- function(M = 1, TF = 1, TM = 1){
+  betas <- rep(NA, length = length(TM));
+  for(i in 1:length(TM)){
+    betas[i] <- calc_beta(M = M, TF = TF, TM = TM[i])[[1]];
+  }
+  return(betas);
+}
+```
+
 
 Male fitness
 ----------------------------
@@ -209,11 +233,79 @@ $$\gamma_{f} > \frac{e^{\frac{1}{\alpha_{1}}T_{M}}}{T_{F}M\sqrt{\beta}   \left(e
 
 Under the above conditions in which the fitness increase caused by the nuptial gift is sufficiently high, females will increase their own fitness by rejecting males that do not have a nuptial gift.
 
+Operational sex ratio
+----------------------------
+
+We assume that the sex ratio at maturation is unity (i.e., equal number of males and females upon maturation). Under this condition, @Kokko2001 show that the operational sex ratio depends on the probability of finding an individual in 'time in',
+
+$$\beta = \frac{\int_{t = 0}^{\infty} P_{IM}(t)dt}{\int_{t = 0}^{\infty} P_{IF}(t)dt}.$$
+
+In the above, $P_{IM}(t)$ and $P_{IF}(t)$ are the probabilities of finding a male and female in 'time in', respectively. @Kokko2001 find these probabilities in terms of the cost of mating. For our purpose, we can find the probability of find a male in 'time in' as the time spent in the mating pool waiting to encounter females ($\sqrt{\beta} / M$) divided by total time in and out,
+
+$$P_{IM}(t) = \frac{\left(\frac{\sqrt{\beta}}{M}\right)}{T_{M} + \left(\frac{\sqrt{\beta}}{M}\right)}.$$
+
+
+We can define $P_{IF}(t)$ similarly,
+
+$$P_{IF}(t) = \frac{ \left( \frac{1}{M\sqrt{\beta}} \right)  }{ T_{F} + \left( \frac{1}{M\sqrt{\beta}} \right)}.$$
+
+
+We therefore can define $\beta$ as below,
+
+$$\beta = \frac{\left(\frac{\left(\frac{\sqrt{\beta}}{M}\right)}{T_{M} + \left(\frac{\sqrt{\beta}}{M}\right)}\right)}{\left(\frac{ \left( \frac{1}{M\sqrt{\beta}} \right)  }{ T_{F} + \left( \frac{1}{M\sqrt{\beta}} \right)}\right)}.$$
+
+
+The above can be simplified,
+
+$$\beta = \frac{\beta T_{F} M + \sqrt{\beta}}{T_{M}M + \sqrt{\beta} }.$$
+
+A closed form solution for the above equation can be found,
+
+$$\beta = \frac{1}{2}\left(\left(M \left( T_{F} - T_{M} \right)\right)^{2} \pm \left(\left(M \left(T_{F} - T_{M} \right) \right)^{4} + 4 \left(M \left(T_{F} - T_{M} \right)\right)^{2} \right)^\frac{1}{2}\right) + 1.$$
+
+We can use this solution to define $\beta$ in terms of $M$, $T_{F}$, and $T_{M}$. Note that there are two solutions to $\beta$, but when $T_{M} > T_{F}$, then $\beta > 1$, and when $T_{M} < T_{F}$, then $\beta < 1$ (if $T_{M} = T_{F}$, then $\beta = 1$).
+
+```{r, echo = FALSE}
+calc_beta <- function(M = 1, TF = 1, TM = 1){
+  term1 <-   (M * (TF - TM))^2;
+  term2 <-   (M * (TF - TM))^4;
+  term3 <- 4*(M * (TF - TM))^2;
+  ttrm  <- (term2 + term3)^(1/2);
+  sol1  <- 0.5 * (term1 - ttrm) + 1;
+  sol2  <- 0.5 * (term1 + ttrm) + 1;
+  if(TF > TM){
+    beta = max(c(sol1, sol2));
+  }else{
+    beta = min(c(sol1, sol2));
+  }
+  return(list = c(beta = beta, solution1 = sol1, solution2 = sol2));
+}
+```
+
+<!---
+
+
+This has two solutions,
+
+$$\beta = \frac{1}{2} \left(\left(\left(M\left(T_{F} - T_{M}\right)\right)^{4} + 4\left(M\left(T_{F} - T_{M}\right) \right)^{2} \right)^{\frac{1}{2}} + \left(M\left(T_{F} - T_{M}\right)\right)^{2}\right) + 1$$
+
+And
+
+$$\beta = \frac{1}{2}\left(\left(M \left( T_{F} - T_{M} \right)\right)^{2} - \left(\left(M \left(T_{F} - T_{M} \right) \right)^{4} + 4 \left(M \left(T_{F} - T_{M} \right)\right)^{2} \right)^\frac{1}{2}\right) + 1.$$
+--->
+
+<!---
+
+$$\beta = \frac{T_{F}\sqrt{\beta} + \beta M}{T_{M}\beta^{2}\sqrt{M} + \beta M}.$$
+
+--->
+
+
 
 Male nuptial search and female choosiness
 -------------------------------------------
 
-We can now investigate the values of $\gamma_{m}$ and  $\gamma_{f}$ across parameter space. First, we look across values of $\alpha_{1}$ given fixed values of  $M = 1$, $\beta = 1$, and $T_{F} = 2$. Note that expected male search time for a nuptial gift will be $T_{M} = \alpha_{1}$, meaning that $\exp(T_{m} / \alpha_{1}) = e$.
+We can now investigate the values of $\gamma_{m}$ and  $\gamma_{f}$ across parameter space. First, we look across values of $\alpha_{1}$ given fixed values of  $M = 1$, and $T_{F} = 2$. Note that expected male search time for a nuptial gift will be $T_{M} = \alpha_{1}$, meaning that $\exp(T_{m} / \alpha_{1}) = e$.
 
 ```{r, echo = FALSE}
 gamma_m <- function(M = 1, beta = 1, alpha = 1/16, TF = 2){
@@ -233,8 +325,9 @@ gamma_f <- function(M = 1, beta = 1, alpha = 1/16, TF = 2){
 ```{r, echo = FALSE, fig.cap = "Parameter space in which males do not search for nuptial gifts and females are not choosy (A), males search but females are not choosy (B), females would be choosy but males do not search (C), and males search and females are choosy (D)."}
 alpha_vals <- seq(from = 0.0001, to = 1.2, by = 0.0001);
 par(mar = c(5, 5, 1, 1));
-g_m <- gamma_m(M = 1, beta = 1, alpha = alpha_vals, TF = 2);
-g_f <- gamma_f(M = 1, beta = 1, alpha = alpha_vals, TF = 2);
+beta_vals <- get_beta(M = 1, TF = 2, TM = alpha_vals);
+g_m <- gamma_m(M = 1, beta = beta_vals, alpha = alpha_vals, TF = 2);
+g_f <- gamma_f(M = 1, beta = beta_vals, alpha = alpha_vals, TF = 2);
 plot(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
      xlab = expression(paste("Nuptial gift search time (", alpha[1], ")")),
      ylab = expression(paste("Fitness threshold (", gamma, ")")),
@@ -243,27 +336,23 @@ points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25,
      col = "black", lty = "solid");
 g_v <- which(g_f > g_m);
 g_w <- which(g_f <= g_m);
-polygon(x = c(alpha_vals[g_v], rev(alpha_vals[g_v]), rev(alpha_vals[g_v]), 
-              alpha_vals[g_v]), 
-        y = c(g_m[g_v], rev(g_f[g_v]), rev(g_f[g_v]), 
-              g_m[g_v]),
+polygon(x = c(alpha_vals[g_v], rev(alpha_vals[g_v])), 
+        y = c(g_m[g_v], rev(g_f[g_v])),
         border = NA, col = "grey70");
-polygon(x = c(alpha_vals[g_w], rev(alpha_vals[g_w]), rev(alpha_vals[g_w]), 
-              alpha_vals[g_w]), 
-        y = c(g_m[g_w], rev(g_f[g_w]), rev(g_f[g_w]), 
-              g_m[g_w]),
+polygon(x = c(alpha_vals[g_w], rev(alpha_vals[g_w])), 
+        y = c(g_m[g_w], rev(g_f[g_w])),
         border = NA, col = "grey20");
 bott <- rep(0, times = length(alpha_vals));
 topp <- c(g_m[g_v], g_f[g_w]);
-polygon(x = c(alpha_vals, rev(alpha_vals), rev(alpha_vals), alpha_vals), 
-        y = c(topp, rev(bott), rev(bott), topp),
+polygon(x = c(alpha_vals, rev(alpha_vals)), 
+        y = c(topp, rev(bott)),
         border = NA, col = "grey90");
 points(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25);
 points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25);
-text(x = 0.75, y = 0.35, cex = 3, labels = "A");
-text(x = 0.15, y = 0.45, cex = 2, labels = "B");
-text(x = 1.1, y = 0.95, cex = 2, labels = "C", col = "white");
-text(x = 0.4, y = 1.25, cex = 4, labels = "D");
+text(x = 0.95, y = 0.2, cex = 3, labels = "A");
+text(x = 0.15, y = 0.2, cex = 2, labels = "B");
+text(x = 1.15, y = 0.65, cex = 2, labels = "C", col = "white");
+text(x = 0.4, y = 1, cex = 4, labels = "D");
 ```
 
 In Figure 1, $\gamma_{m}$ and  $\gamma_{f}$ values are indicated by the sloping and horizontal lines, respectively, which divide the plot into four distinct zones (A-D). In zone A, $\gamma$ is too low relative to $\alpha_{1}$ for males to benefit from searching for nuptial gifts, and too low for females to benefit by being choosy. In zone B, $\gamma$ is sufficiently high relative to $\alpha_{1}$ for males to benefit from searching, but females do not benefit from being choosy. In zone C, males do not benefit from searching for nuptial gifts, but females would benefit from being choosy. Lastly, in zone D, we expect males to benefit from searching for nuptial gifts and for females to benefit by choosing only males that offer nuptial gifts. Note that it is tempting to suggest that zone C is where we might expect male searching for fake nuptial gifts to evolve, but in this zone, no males actually benefit from procuring a nuptial gift. Hence, nuptial gifts should be only fake in zone C, eroding the benefit of female choosiness. Consequently, we could conclude that fake nuptial gift giving should evolve and persist only in zone D, with subsequent effects on $\beta$ (due to more males being in time out) that might affect $\gamma_{f}$.
@@ -273,53 +362,49 @@ If we increase $M$ to a value of $M = 2$, then the slope at which $\gamma_{m}$ i
 ```{r, echo = FALSE, fig.cap = "Areas of parameter space in which males do not search for nuptial gifts and females are not choosy (A), males search but females are not choosy (B), females would be choosy but males do not search (C), and males search and females are choosy (D). Arrows indicate the effect of increasing interaction rate (M) and female time-out (T_F)"}
 alpha_vals <- seq(from = 0.0001, to = 1.2, by = 0.0001);
 par(mar = c(5, 5, 1, 1));
-g_m <- gamma_m(M = 2, beta = 1, alpha = alpha_vals, TF = 2);
-g_f <- gamma_f(M = 2, beta = 1, alpha = alpha_vals, TF = 2);
+beta_vals <- get_beta(M = 1, TF = 2, TM = alpha_vals);
+g_m <- gamma_m(M = 2, beta = beta_vals, alpha = alpha_vals, TF = 2);
+g_f <- gamma_f(M = 2, beta = beta_vals, alpha = alpha_vals, TF = 2);
 plot(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
      xlab = expression(paste("Nuptial gift search time (", alpha[1], ")")),
      ylab = expression(paste("Fitness threshold (", gamma, ")")),
-     ylim = c(0, 1.5));
+     ylim = c(0, 1.5), col = "black");
 points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25,
      col = "black", lty = "solid");
 g_v <- which(g_f > g_m);
 g_w <- which(g_f <= g_m);
-polygon(x = c(alpha_vals[g_v], rev(alpha_vals[g_v]), rev(alpha_vals[g_v]), 
-              alpha_vals[g_v]), 
-        y = c(g_m[g_v], rev(g_f[g_v]), rev(g_f[g_v]), 
-              g_m[g_v]),
+polygon(x = c(alpha_vals[g_v], rev(alpha_vals[g_v])), 
+        y = c(g_m[g_v], rev(g_f[g_v])),
         border = NA, col = "grey70");
-polygon(x = c(alpha_vals[g_w], rev(alpha_vals[g_w]), rev(alpha_vals[g_w]), 
-              alpha_vals[g_w]), 
-        y = c(g_m[g_w], rev(g_f[g_w]), rev(g_f[g_w]), 
-              g_m[g_w]),
+polygon(x = c(alpha_vals[g_w], rev(alpha_vals[g_w])), 
+        y = c(g_m[g_w], rev(g_f[g_w])),
         border = NA, col = "grey20");
 bott <- rep(0, times = length(alpha_vals));
 topp <- c(g_m[g_v], g_f[g_w]);
-polygon(x = c(alpha_vals, rev(alpha_vals), rev(alpha_vals), alpha_vals), 
-        y = c(topp, rev(bott), rev(bott), topp),
+polygon(x = c(alpha_vals, rev(alpha_vals)),
+        y = c(topp, rev(bott)),
         border = NA, col = "grey90");
-points(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25, 
+points(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
        col = "blue");
-points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25, 
+points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25,
        col = "red");
-text(x = 0.8, y = 0.2, cex = 3, labels = "A");
-text(x = 0.05, y = 0.3, cex = 2, labels = "B");
-text(x = 1, y = , cex = 4, labels = "C", col = "white");
+text(x = 0.8, y = 0.1, cex = 2, labels = "A");
+text(x = 0.02, y = 0.1, cex = 1, labels = "B");
+text(x = 1, y = 0.7, cex = 4, labels = "C", col = "white");
 text(x = 0.2, y = 1.1, cex = 5, labels = "D");
-arrows(x0 = alpha_vals[5500], x1 = alpha_vals[4800], col = "blue",
-       y0 = g_m[5500], y1 = 1.2, length = 0.1, lwd = 2);
-text(x = alpha_vals[4550], y = 1.24, labels = "M", col = "blue");
+arrows(x0 = alpha_vals[8500], x1 = alpha_vals[7800], col = "blue",
+       y0 = g_m[8500], y1 = 1.2, length = 0.1, lwd = 2);
+text(x = alpha_vals[7550], y = 1.27, labels = "M", col = "blue");
 arrows(x0 = alpha_vals[5000], x1 = alpha_vals[5000], col = "red",
-       y0 = g_f[5000], y1 = 0.25, length = 0.1, lwd = 2);
-text(x = alpha_vals[5000], y = 0.2, labels = "M", col = "red");
+       y0 = g_f[5000], y1 = 0.1, length = 0.1, lwd = 2);
+text(x = alpha_vals[5000], y = 0.05, labels = "M", col = "red");
 arrows(x0 = alpha_vals[4000], x1 = alpha_vals[4000], col = "red",
-       y0 = g_f[4000], y1 = 0.25, length = 0.1, lwd = 2);
-text(x = alpha_vals[4000], y = 0.2, labels = expression(T[F]), col = "red");
+       y0 = g_f[4000], y1 = 0.1, length = 0.1, lwd = 2);
+text(x = alpha_vals[4000], y = 0.05, labels = expression(T[F]), col = "red");
 # Make an arrow perpendicular to the slope indicating effect of M
 # Arrow goes down to indicate what happens for gamma_f with M
 # Arrow goes down to indicate what happens for gamma_f with TF
 ```
-
 
 
 
@@ -596,75 +681,6 @@ plot(x = ts, y = yy, type = "l", lwd = 2, cex.lab = 1, ylim = c(0, 8),
 abline(h = 0, lty = "dotted", lwd = 0.8);
 ```
 
-
-
-
-
-
-Operation sex ratio
-----------------------------
-
-We assume that the sex ratio at maturation is unity (i.e., equal number of males and females upon maturation). Under this condition, @Kokko2001 show that the operational sex ratio depends on the probability of finding an individual in 'time in',
-
-$$\beta = \frac{\int_{t = 0}^{\infty} P_{IM}(t)dt}{\int_{t = 0}^{\infty} P_{IF}(t)dt}.$$
-In the above, $P_{IM}(t)$ and $P_{IF}(t)$ are the probabilities of finding a male and female in 'time in', respectively. @Kokko2001 find these probabilities in terms of the cost of mating. For our purpose, we can find the probability of find a male in 'time in' as the time spent in the mating pol waiting to encounter females ($\sqrt{\beta} / M$) divided by total time in and out,
-
-$$P_{IM}(t) = \frac{\left(\frac{\sqrt{\beta}}{M}\right)}{T_{M} + \left(\frac{\sqrt{\beta}}{M}\right)}.$$
-
-<!---
-
-$$P_{IM}(t) = \frac{\frac{\sqrt{M}}{\beta}}{T_{m} + \frac{\sqrt{M}}{\beta}}.$$
---->
-
-We can define $P_{IF}(t)$ similarly,
-
-$$P_{IF}(t) = \frac{ \left( \frac{1}{M\sqrt{\beta}} \right)  }{ T_{F} + \left( \frac{1}{M\sqrt{\beta}} \right)}.$$
-
-<!---
-
-$$P_{IF}(t) = \frac{M\sqrt{\beta}}{T_{F} + M\sqrt{\beta}}.$$
---->
-
-
-We therefore can define $\beta$ as below,
-
-$$\beta = \frac{\frac{\left(\frac{\sqrt{\beta}}{M}\right)}{T_{M} + \left(\frac{\sqrt{\beta}}{M}\right)}}{\frac{ \left( \frac{1}{M\sqrt{\beta}} \right)  }{ T_{F} + \left( \frac{1}{M\sqrt{\beta}} \right)}}.$$
-
-<!---
-
-$$\beta = \frac{\frac{\frac{\sqrt{M}}{\beta}}{T_{m} + \frac{\sqrt{M}}{\beta}}}{\frac{M\sqrt{\beta}}{T_{F} + M\sqrt{\beta}}}.$$
---->
-
-
-The above can be simplified,
-
-$$\beta = \frac{\beta T_{F} M + \sqrt{\beta}}{T_{M}M + \sqrt{\beta} }.$$
-
-A closed form solution for the above equation can be found,
-
-$$\beta = \frac{1}{2}\left(\left(M \left( T_{F} - T_{M} \right)\right)^{2} \pm \left(\left(M \left(T_{F} - T_{M} \right) \right)^{4} + 4 \left(M \left(T_{F} - T_{M} \right)\right)^{2} \right)^\frac{1}{2}\right) + 1.$$
-
-
-
-<!---
-
-
-This has two solutions,
-
-$$\beta = \frac{1}{2} \left(\left(\left(M\left(T_{F} - T_{M}\right)\right)^{4} + 4\left(M\left(T_{F} - T_{M}\right) \right)^{2} \right)^{\frac{1}{2}} + \left(M\left(T_{F} - T_{M}\right)\right)^{2}\right) + 1$$
-
-And
-
-$$\beta = \frac{1}{2}\left(\left(M \left( T_{F} - T_{M} \right)\right)^{2} - \left(\left(M \left(T_{F} - T_{M} \right) \right)^{4} + 4 \left(M \left(T_{F} - T_{M} \right)\right)^{2} \right)^\frac{1}{2}\right) + 1.$$
---->
-
-<!---
-
-$$\beta = \frac{T_{F}\sqrt{\beta} + \beta M}{T_{M}\beta^{2}\sqrt{M} + \beta M}.$$
-
---->
-
-Note that the equation is recursive, so we need to figure out a closed form solution if possible by figuring out the pattern. Note that this equation makes some intuitive sense. The value of $\beta$ increases with higher female time out ($T_{F}$) and decreases with higher male time out ($T_{M}$). If $T_{F} = T_{M} = 0$, then we have $\beta = 0$; note that @Kokko2001 also multiplied the whole thing by a constant representing sex ratio upon reproductive maturity.
 
 
 Old calculations
