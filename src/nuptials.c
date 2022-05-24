@@ -63,23 +63,21 @@ void move_inds(double **inds, int xdim, int ydim, int N){
       new_xloc   = xloc + randunifint(-1 * move_max_x, move_max_x);
       new_yloc   = yloc + randunifint(-1 * move_max_y, move_max_y);
       if(new_xloc < 0){
-        xloc = xloc + xdim;
+        xloc = new_xloc + xdim;
       }
       if(new_xloc >= xdim){
-        xloc = xloc - xdim;
+        xloc = new_xloc - xdim;
       }
       if(new_yloc < 0){
-        yloc = yloc + ydim;
+        yloc = new_yloc + ydim;
       }
       if(new_yloc >= ydim){
-        yloc = yloc - ydim;
+        yloc = new_yloc - ydim;
       }
       inds[i][2] = (double) xloc;
       inds[i][3] = (double) yloc;
     }
 }
-
-
 
 /******************************************************************************/
 /* Main outer function that runs a nuptial gift giving simulation over time   */
@@ -113,7 +111,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         /* ==========================================================*/
         /* MOVE INDIVIDUALS                                          */
         /* ==========================================================*/        
-
+        move_inds(inds, xdim, ydim, N);
 
         /* ==========================================================*/
         /* GET OFFSPRING                                             */
