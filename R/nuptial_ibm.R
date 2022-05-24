@@ -110,7 +110,7 @@ get_offspring <- function(inds){
 
 female_male_int <- function(inds, female, male){
   has_gift <- inds[male, 8];
-  rej_gift <- inds[male, 9];
+  rej_gift <- inds[female, 9];
   acceptml <- runif(n = 1, min = 0, max = 1);
   if(rej_gift < acceptml){
     male_add  <- inds[male, 12] * inds[male, 8];
