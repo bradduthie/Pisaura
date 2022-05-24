@@ -79,6 +79,29 @@ void move_inds(double **inds, int xdim, int ydim, int N){
     }
 }
 
+
+/******************************************************************************/
+/* Get offspring numbers                                                      */
+/******************************************************************************/
+void get_offspring(double **inds, int N){
+
+    int i, *IDs;
+    
+    IDs = malloc(N * sizeof(int));
+
+    for(i = 0; i < N; i++){
+      IDs[i] = (int) inds[i][0];
+    }
+
+    rand_int_shuffle(IDs, N); /* Shuffling the IDs */
+    
+    /* LET OFF HERE XXX: 
+    
+    XXX Need to cycle through random order to see if interaction happens
+    
+    */
+}
+
 /******************************************************************************/
 /* Main outer function that runs a nuptial gift giving simulation over time   */
 /******************************************************************************/
@@ -86,7 +109,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               double mim, double mom, double gam, double mov, double a1,
               double lambd, int xdim, int ydim){
 
-    int ts, row, col, ind_traits;
+    int ts, row, ind_traits;
     double **inds;
     
     /* =======================================================================*/
@@ -116,7 +139,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         /* ==========================================================*/
         /* GET OFFSPRING                                             */
         /* ==========================================================*/
-        
+        get_offspring(inds, N);
         
         /* ==========================================================*/
         /* ADD OFFSPRING                                             */
@@ -134,13 +157,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         
         printf("Time step: %d\n", ts);
     }
-    
-    for(row = 0; row < N; row++){
-      for(col = 0; col < 5; col++){
-          printf("%f\t", inds[row][col]);
-      }
-      printf("\n");
-    }
+
 }
 
 

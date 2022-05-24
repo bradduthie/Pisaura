@@ -7,3 +7,5 @@ int randpois(double lambda);
 int randbinom(double pr);
 
 int randunifint(int min, int max);
+
+void rand_int_shuffle(int *a, int N);
