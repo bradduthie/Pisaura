@@ -1,5 +1,7 @@
 #include "as183.h"
 
+double randunif(void);
+
 double randnorm(double mean, double sd);
 
 int randpois(double lambda);

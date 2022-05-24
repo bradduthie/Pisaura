@@ -40,10 +40,9 @@ void initialise(int N, double Tm, double Tf, double rejg, double mim,
       inds[row][14] = 0;
       inds[row][15] = 0;
       inds[row][16] = 0;
-      inds[row][17] = 0;
-      inds[row][18] = lambd;
+      inds[row][17] = lambd;
+      inds[row][18] = 0;
       inds[row][19] = 0;
-      inds[row][20] = 0;
     }
 
 }
@@ -81,25 +80,130 @@ void move_inds(double **inds, int xdim, int ydim, int N){
 
 
 /******************************************************************************/
+/* Female and male interaction                                                */
+/******************************************************************************/
+void female_male_int(double **inds, int female, int male){
+
+    double rej_gift, acceptml, male_add, birth_par, offspring;
+
+    rej_gift = inds[female][8];
+    acceptml = randunif();
+    if(rej_gift < acceptml){
+      male_add         = inds[male][11] * inds[male][7];
+      birth_par        = inds[female][17] + male_add;
+      offspring        = randpois(birth_par);
+      inds[female][14] = offspring; 
+      inds[female][4]  = 0;
+      inds[male][4]    = 0;
+      inds[male][7]    = 0;
+      inds[female][19] = inds[male][0];
+    }
+}
+
+/******************************************************************************/
+/* Females enter the mating pool                                              */
+/******************************************************************************/
+void female_enter(double **inds, int female){
+
+  double iTf, enter_prob, enter_rand;
+
+  iTf        = inds[female][6];
+  enter_prob = exp(-1 * iTf);
+  enter_rand = randunif();
+  if(enter_rand < enter_prob){
+    inds[female][4] = 1.0;
+  }
+}
+
+/******************************************************************************/
+/* Males searching for nuptial gift                                           */
+/******************************************************************************/
+void male_search(double **inds, int male){
+
+  int isin;
+  double iTm, a1, enter_prob, enter_rand, gift_prob, gift_rand;
+
+  isin       = (int) inds[male][4];
+  iTm        = inds[male][5];
+  a1         = inds[male][13];
+  enter_prob = exp(-1 * iTm);
+  enter_rand = randunif();
+  if(enter_rand < enter_prob){
+    inds[male][4] = 1.0;
+    isin          = 1;
+  }
+  gift_prob = 1 - exp(-1 * (1 / a1) * iTm);
+  gift_rand = randunif();
+  if(isin > 0 && gift_rand < gift_prob){
+    inds[male][7] = 1.0;
+  }
+}
+
+/******************************************************************************/
+/* Assess mortality of individual                                             */
+/******************************************************************************/
+void ind_mortality(double **inds, int i){
+  
+  double in_or_out, rand_mort, in_mort, mort_pr, out_mort;
+
+  in_or_out = inds[i][4];
+  rand_mort = randunif();
+  if(in_or_out > 0){
+    in_mort  = inds[i][9];
+    mort_pr  = 1 - exp(-1 * in_mort);
+  }else{
+    out_mort = inds[i][10];
+    mort_pr  = 1 - exp(-1 * out_mort);
+  }
+  if(rand_mort < mort_pr){
+    inds[i][18] = 1.0;
+  }
+}
+
+
+/******************************************************************************/
 /* Get offspring numbers                                                      */
 /******************************************************************************/
 void get_offspring(double **inds, int N){
 
-    int i, *IDs;
+    int i, j, row, isex, ixloc, iyloc, iisin, jsex, jxloc, jyloc, jisin; 
+    int *IDs;
     
     IDs = malloc(N * sizeof(int));
 
     for(i = 0; i < N; i++){
-      IDs[i] = (int) inds[i][0];
+      IDs[i] = i;
     }
 
     rand_int_shuffle(IDs, N); /* Shuffling the IDs */
     
-    /* LET OFF HERE XXX: 
-    
-    XXX Need to cycle through random order to see if interaction happens
-    
-    */
+    for(row = 0; row < N; row++){
+        i     = (int) IDs[row];
+        isex  = (int) inds[i][1];
+        ixloc = (int) inds[i][2];
+        iyloc = (int) inds[i][3];
+        iisin = (int) inds[i][4];
+        if(isex > 0 && iisin > 0){
+          for(j = 0; j < N; j++){
+              jsex  = (int) inds[j][1];
+              jxloc = (int) inds[j][2];
+              jyloc = (int) inds[j][3];
+              jisin = (int) inds[j][4];
+              if(jxloc == ixloc && jyloc == iyloc && jsex == 0 && jisin > 0){
+                   /* female_male_int(inds, i, j); */
+              }
+          }
+        }
+        if(iisin == 0 && isex == 0){
+           /* female_enter(inds, row); */
+        }
+        if(iisin == 0 && isex == 1){
+           /* male_search(inds, row); */
+        }
+        /* ind_mortality(inds, i); */
+    }
+
+    free(IDs);
 }
 
 /******************************************************************************/
@@ -158,6 +262,10 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         printf("Time step: %d\n", ts);
     }
 
+    for(row = 0; row < N; row++){
+      free(inds[row]);
+    }
+    free(inds);
 }
 
 
