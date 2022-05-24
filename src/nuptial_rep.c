@@ -10,18 +10,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "Inbreed.h"
+#include "nuptials.h"
 
 int main(void){
 
-    int    i, rep;
+    int i, time_steps, N, rep, xdim, ydim;
+    double Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd;
 
     /* ======= VARIABLES BETWEEN THE Xs BELOW ADJUST MODEL PARAMETERS ========*/
     /*  XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX   */
     /* =======================================================================*/
     /* Model parameter values                                                 */
     /* =======================================================================*/
-    N = 1000; /* Population size
+    time_steps = 40;   /* Simulation time steps                               */
+    N          = 1000; /* Population size                                     */
+    Tm         = 0.0;  /* Initial male search time                            */
+    Tf         = 1.0;  /* Initial female processing time                      */
+    rejg       = 0.0;  /* Initial female rejection probability                */
+    mim        = 1.0;  /* Mortality rate for time-in stage                    */
+    mom        = 1.0;  /* Mortality rate for time-out stage                   */
+    gam        = 1.0;  /* Offspring increase for nuptial gift                 */
+    mov        = 1.0;  /* Movement parameter                                  */
+    a1         = 0.4;  /* Search time needed to find a gift                   */
+    lambd      = 2.0;  /* Baseline female reproduction                        */
+    xdim       = 20;   /* dimension of x-loc landscape                        */
+    ydim       = 20;   /* dimension of y-loc landscape                        */
     /* =======================================================================*/
 
     /* =======================================================================*/

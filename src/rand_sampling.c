@@ -40,3 +40,32 @@ int randpois(double lambda){
     
     return k-1;
 }
+
+int randbinom(double pr){
+    int val;
+    double u;
+    
+    u = randunif();
+
+    if(u < pr){
+      val = 0;    
+    }else{
+      val = 1;
+    }
+    
+    return val;
+}
+
+
+int randunifint(int min, int max){
+    int val, diff;
+    double u, val;
+
+    diff = (max + 1) - min;
+    u    = diff * randunif();
+    val  = (int) floor(u) + min;
+
+    return val;
+}
+
+
