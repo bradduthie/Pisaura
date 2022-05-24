@@ -49,6 +49,39 @@ void initialise(int N, double Tm, double Tf, double rejg, double mim,
 }
 
 /******************************************************************************/
+/* Move individuals                                                           */
+/******************************************************************************/
+void move_inds(double **inds, int xdim, int ydim, int N){
+
+    int i, xloc, yloc, move_max_x, new_xloc, move_max_y, new_yloc;
+    
+    for(i = 0; i < N; i++){
+      xloc       = (int) inds[i][2];
+      yloc       = (int) inds[i][3];
+      move_max_x = (int) inds[i][12];
+      move_max_y = (int) inds[i][12];
+      new_xloc   = xloc + randunifint(-1 * move_max_x, move_max_x);
+      new_yloc   = yloc + randunifint(-1 * move_max_y, move_max_y);
+      if(new_xloc < 0){
+        xloc = xloc + xdim;
+      }
+      if(new_xloc >= xdim){
+        xloc = xloc - xdim;
+      }
+      if(new_yloc < 0){
+        yloc = yloc + ydim;
+      }
+      if(new_yloc >= ydim){
+        yloc = yloc - ydim;
+      }
+      inds[i][2] = (double) xloc;
+      inds[i][3] = (double) yloc;
+    }
+}
+
+
+
+/******************************************************************************/
 /* Main outer function that runs a nuptial gift giving simulation over time   */
 /******************************************************************************/
 void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
@@ -102,6 +135,13 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         ts++;
         
         printf("Time step: %d\n", ts);
+    }
+    
+    for(row = 0; row < N; row++){
+      for(col = 0; col < 5; col++){
+          printf("%f\t", inds[row][col]);
+      }
+      printf("\n");
     }
 }
 
