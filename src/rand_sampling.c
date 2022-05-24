@@ -4,11 +4,17 @@
    Description: Will produce one norm or pois random number
    Compile: gcc randnormINT.c -ansi -Wall -pedantic                           */
 /******************************************************************************/
+#include "as183.h"
 
-#include <stdio.h>     /* Standard input/output */
-#include <stdlib.h>    /* Standard library */
-#include <math.h>      /* Math library (for log and sqrt) */
-#include "randunif.h" /* Need to generate random uniforms */
+double randunif(void){
+    int seed[3];
+    double randun;
+       seed[0] = rand();
+       seed[1] = rand();
+       seed[2] = rand();
+       randun  = as183(seed); 
+    return randun;
+}
 
 double randnorm(double mean, double sd){
     double x1, x2, w, y;    
@@ -59,7 +65,7 @@ int randbinom(double pr){
 
 int randunifint(int min, int max){
     int val, diff;
-    double u, val;
+    double u;
 
     diff = (max + 1) - min;
     u    = diff * randunif();

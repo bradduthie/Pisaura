@@ -50,8 +50,17 @@ int main(void){
 
     while(i < rep){
 
+        nuptials(time_steps, N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, 
+                 xdim, ydim);
+                 
         i++;
 
     }
     return 0;
 }
+
+
+
+
+
+

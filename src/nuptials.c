@@ -16,9 +16,9 @@
 /******************************************************************************/
 /* Initialise the population                                                  */
 /******************************************************************************/
-void initialise(int N, int ind_traits, double Tm, double Tf, double rejg, 
-                double mim, double mom, double gam, double mov, double a1, 
-                double lambd, int xdim, int ydim, double **inds){
+void initialise(int N, double Tm, double Tf, double rejg, double mim, 
+                double mom, double gam, double mov, double a1, double lambd, 
+                int xdim, int ydim, double **inds){
 
     int row;
     
@@ -30,7 +30,7 @@ void initialise(int N, int ind_traits, double Tm, double Tf, double rejg,
       inds[row][4]  = 1;
       inds[row][5]  = Tm;
       inds[row][6]  = Tf;
-      inds[row][7]  = gft;
+      inds[row][7]  = 0;
       inds[row][8]  = rejg;
       inds[row][9]  = mim;
       inds[row][10] = mom;
@@ -55,7 +55,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               double mim, double mom, double gam, double mov, double a1,
               double lambd, int xdim, int ydim){
 
-    int ts, row, ind_traits;
+    int ts, row, col, ind_traits;
     double **inds;
     
     /* =======================================================================*/
@@ -68,12 +68,11 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
       inds[row] = (double *) malloc(ind_traits * sizeof(double));
     }
 
-
     /* =======================================================================*/
     /* INITIALISE INDIVIDUALS: */
     /* =======================================================================*/
-    initialise(N, ind_traits, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, xdim,
-               ydim, **inds);
+    initialise(N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, xdim, ydim, 
+               inds);
     
     ts = 0;
     while(ts < time_steps){
@@ -101,6 +100,8 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         /* ==========================================================*/
         
         ts++;
+        
+        printf("Time step: %d\n", ts);
     }
 }
 

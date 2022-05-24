@@ -1,7 +1,4 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include "randunif.h"
+#include "as183.h"
 
 double randnorm(double mean, double sd);
 

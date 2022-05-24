@@ -2,11 +2,8 @@ CXX    = gcc
 CFLAGS = -fopenmp -ansi -Wall -pedantic -std=c99
 
 RunInbr: nuptial_rep.o nuptials.o rand_sampling.o as183.o
-	$(CC) $(CFLAGS) -o nuptial_rep nuptial_rep.o nuptials.o rand_sampling.o 
-	as183.o -lm
-
-nuptials.o: nuptials.c
-	$(CC) $(CFLAGS) -c nuptials.c
+	$(CC) $(CFLAGS) -o nuptial_rep nuptial_rep.o nuptials.o                \
+	rand_sampling.o as183.o -lm
 
 nuptials.o: nuptials.c
 	$(CC) $(CFLAGS) -c nuptials.c
