@@ -35,6 +35,7 @@ int main(void){
     lambd      = 2.0;  /* Baseline female reproduction                        */
     xdim       = 20;   /* dimension of x-loc landscape                        */
     ydim       = 20;   /* dimension of y-loc landscape                        */
+    K          = 1000; /* Population carrying capacity                        */
     /* =======================================================================*/
 
     /* =======================================================================*/
@@ -51,7 +52,7 @@ int main(void){
     while(i < rep){
 
         nuptials(time_steps, N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, 
-                 xdim, ydim);
+                 xdim, ydim, K);
                  
         i++;
 

@@ -13,6 +13,18 @@
 
 #define length(x) (sizeof (x) / sizeof *(x))
 
+/* =============================================================================
+ * Swap pointers to rewrite ARRAY_B into ARRAY_A for a an array of any dimension
+ * ========================================================================== */
+void swap_arrays(void **ARRAY_A, void **ARRAY_B){
+    
+    void *TEMP_ARRAY;
+    
+    TEMP_ARRAY = *ARRAY_A;
+    *ARRAY_A   = *ARRAY_B;
+    *ARRAY_B   = TEMP_ARRAY;
+}
+
 /******************************************************************************/
 /* Initialise the population                                                  */
 /******************************************************************************/
@@ -23,26 +35,26 @@ void initialise(int N, double Tm, double Tf, double rejg, double mim,
     int row;
     
     for(row = 0; row < N; row++){
-      inds[row][0]  = row + 1;
+      inds[row][0]  = (double) row + 1;
       inds[row][1]  = randbinom(0.5);
       inds[row][2]  = randunifint(0, xdim - 1);
       inds[row][3]  = randunifint(0, ydim - 1);
-      inds[row][4]  = 1;
+      inds[row][4]  = 1.0;
       inds[row][5]  = Tm;
       inds[row][6]  = Tf;
-      inds[row][7]  = 0;
+      inds[row][7]  = 0.0;
       inds[row][8]  = rejg;
       inds[row][9]  = mim;
       inds[row][10] = mom;
       inds[row][11] = gam;
       inds[row][12] = mov;
       inds[row][13] = a1;
-      inds[row][14] = 0;
-      inds[row][15] = 0;
-      inds[row][16] = 0;
+      inds[row][14] = 0.0;
+      inds[row][15] = 0.0;
+      inds[row][16] = 0.0;
       inds[row][17] = lambd;
-      inds[row][18] = 0;
-      inds[row][19] = 0;
+      inds[row][18] = 0.0;
+      inds[row][19] = 0.0;
     }
 
 }
@@ -207,30 +219,196 @@ void get_offspring(double **inds, int N){
 }
 
 /******************************************************************************/
+/* Count the total number of offspring                                        */
+/******************************************************************************/
+int count_offspring(double **inds, int N){
+    int i, count;
+
+    count = 0;
+    for(i = 0; i < N; i++){
+        count += inds[i][14];
+    }
+
+    return count;
+}
+
+/******************************************************************************/
+/* Find the dad for a mum's offspring                                         */
+/******************************************************************************/
+int find_dad(double **inds, int N, double dad_ID){
+    int i;
+    
+    while(inds[i][0] != dad_ID && i < N){
+        i++;
+    }
+
+    return i;
+}
+
+/******************************************************************************/
+/* Offspring trait from mum and dad                                           */
+/******************************************************************************/
+double off_trait(double **inds, int mum_row, int dad_row, int trait_col){
+    
+    double p_mean, mu_val;
+
+    p_mean = 0.5 * (inds[mum_row][trait_col] + inds[dad_row][trait_col]);
+    mu_val = randnorm(0, 0.02);
+
+    off_val = p_mean + mu_val;
+    if(off_val < 0.0){
+        off_val = 0.0;
+    }
+
+    return off_val;
+}
+
+
+/******************************************************************************/
+/* Add offspring to a new array                                               */
+/******************************************************************************/
+void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
+                   int *ID){
+
+    int mum_row, off_pos, mum_ID, dad_ID;
+
+    off_pos = 0;
+    for(mum_row = 0; mum_row < N; mum_row++){
+        while(inds[mum_row][14] > 0){
+            mum_ID   = inds[mum_row][0];
+            dad_ID   = inds[mum_row][19];
+            dad_row  = find_dad(inds, N, dad_ID);
+            /* Inserting offspring traits below */
+            offs[off_pos][0]  = (double) ID[0];
+            offs[off_pos][1]  = randbinom(0.5);
+            offs[off_pos][2]  = inds[mum_row][2];
+            offs[off_pos][3]  = inds[mum_row][3];
+            offs[off_pos][4]  = 1.0
+            offs[off_pos][5]  = off_trait(inds, mum_row, dad_row, 5);
+            offs[off_pos][6]  = off_trait(inds, mum_row, dad_row, 6);
+            offs[off_pos][7]  = 0.0;
+            offs[off_pos][8]  = off_trait(inds, mum_row, dad_row, 8);
+            offs[off_pos][9]  = inds[mum_row][9];
+            offs[off_pos][10] = inds[mum_row][10];
+            offs[off_pos][11] = inds[mum_row][11];
+            offs[off_pos][12] = inds[mum_row][12];
+            offs[off_pos][13] = inds[mum_row][13];
+            offs[off_pos][14] = 0.0;
+            offs[off_pos][15] = inds[mum_row][0];
+            offs[off_pos][16] = inds[dad_row][0];
+            offs[off_pos][17] = inds[mum_row][17];
+            offs[off_pos][18] = 0.0;
+            offs[off_pos][19] = 0.0;
+            /* Prepare for next offspring */
+            off_pos++;
+            ID[0]++;
+            inds[mum_row][14]--;
+        }
+    }
+}
+
+
+/******************************************************************************/
+/* Apply the carrying capacity to inds and offspring                          */
+/******************************************************************************/
+void apply_K(double **inds, int N, double **offs, int off_N, int K){
+
+    int new_N, kill;
+
+    new_N = N + off_N;
+
+    while(new_N > K){
+      kill = randunifint(0, new_N);
+      if(kill < N){
+        inds[kill][18] = 1.0;
+        new_N--;
+      }else{
+        kill           -= N;
+        offs[kill][18] =  1.0;
+        new_N--;
+      }
+    }
+}
+
+/******************************************************************************/
+/* Counts the number of living individuals                                    */
+/******************************************************************************/
+int count_living(double **inds, int N, double **offs, int off_N){
+
+    int count, i;
+
+    count = 0;
+
+    for(i = 0; i < N; i++){
+        if(inds[i][18] < 1.0){
+          count++;
+        }
+    }
+    for(i = 0; i < off_N; i++){
+        if(offs[i][18] < 1.0){
+          count++;
+        }
+    }
+
+    return count;
+}
+
+
+/******************************************************************************/
+/* Apply the carrying capacity to inds and offspring                          */
+/******************************************************************************/
+void build_new_N_offs(double **inds, int N, double **offs, int off_N, int new_N,
+                      double **news, int ind_traits){
+
+    int row, col, new_row;
+
+    new_row = 0;
+    for(row = 0; row < N; row++){
+      if(inds[row][18] < 1.0){
+        for(col = 0; col < ind_traits; col++){
+          news[new_row][col] = inds[row][col];
+        }
+        new_row++;
+      }
+    }
+    for(row = 0; row < off_N; row++){
+      if(offs[row][18] < 1.0){
+        for(col = 0; col < ind_traits; col++){
+          news[new_row][col] = offs[row][col];
+        }
+        new_row++;
+      }
+    }
+}
+
+/******************************************************************************/
 /* Main outer function that runs a nuptial gift giving simulation over time   */
 /******************************************************************************/
 void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               double mim, double mom, double gam, double mov, double a1,
-              double lambd, int xdim, int ydim){
+              double lambd, int xdim, int ydim, int K){
 
-    int ts, row, col, ind_traits;
-    double **inds;
+    int ts, row, col, ind_traits, off_N, new_N, *ID;
+    double **inds, **offs, **news;
     
     /* =======================================================================*/
     /* DEFINE VARIABLES TO BE USED: */
     /* =======================================================================*/
     ind_traits = 20;
     
+    ID   = malloc(sizeof(int));
     inds = (double **) malloc(N * sizeof(double));
     for(row = 0; row < N; row++){
       inds[row] = (double *) malloc(ind_traits * sizeof(double));
     }
+    
 
     /* =======================================================================*/
     /* INITIALISE INDIVIDUALS: */
     /* =======================================================================*/
     initialise(N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, xdim, ydim, 
                inds);
+    ID[0] = N;
     
     ts = 0;
     while(ts < time_steps){
@@ -248,33 +426,84 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         /* ==========================================================*/
         /* ADD OFFSPRING                                             */
         /* ==========================================================*/
-        
-        /* XXX XXX CHECK get_offspring XXX But left off HERE XXX XXX */
+        off_N = count_offspring(inds, N);
+        if(off_N > 0){   
+          offs  = (double **) malloc(off_N * sizeof(double));
+          for(row = 0; row < off_N; row++){
+              offs[row] = (double *) malloc(ind_traits * sizeof(double));
+          }
 
+          add_offspring(inds, N, offs, off_N, ind_traits, ID);
+
+          apply_K(inds, N, offs, off_N, K);
+
+          new_N = count_living(inds, N, offs, off_N);
+
+          news = (double **) malloc(new_N * sizeof(double));
+          for(row = 0; row < new_N; row++){
+            news[row] = (double *) malloc(ind_traits * sizeof(double));
+          }
+
+          build_new_N_offs(inds, N, offs, off_N, new_N, news, ind_traits);
+
+          /* Need to now change N and get the news into inds */
+
+
+          for(row = 0; row < off_N; row++){
+              free(offs[row]);
+          }
+          free(offs);
+
+        }else{
+
+         /* Just remove the dead ones and put it in a new array */
+
+        }
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+/*
+
+        swap_arrays((void*)&(olds), (void*)&inds);
+
+        inds = (double **) malloc(new_N * sizeof(double));
+        for(row = 0; row < N; row++){
+            inds[row] = (double *) malloc(ind_traits * sizeof(double));
+        }
+*/
         /* ==========================================================*/
         /* REMOVE DEAD                                               */
         /* ==========================================================*/
-        
-        /* ==========================================================*/
-        /* CARRYING CAPACITY                                         */
-        /* ==========================================================*/
-        
+
         ts++;
         
-        printf("Time step: %d\n", ts);
+        printf("Time step: %d\t%d\t%d\n", ts, N, off_N);
     }
-
+/*
     for(row = 0; row < N; row++){
         for(col = 0; col < 6; col++){
             printf("%f\t", inds[row][col]);
         } 
         printf("\n");
     }
-
+*/
     for(row = 0; row < N; row++){
       free(inds[row]);
     }
     free(inds);
+    free(ID);
 }
 
 
