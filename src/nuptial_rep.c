@@ -23,18 +23,18 @@ int main(void){
     /* Model parameter values                                                 */
     /* =======================================================================*/
     time_steps = 4000;  /* Simulation time steps                              */
-    N          = 1000;  /* Population size                                    */
+    N          = 2000;  /* Population size                                    */
     Tm         = 0.0;   /* Initial male search time                           */
     Tf         = 1.0;   /* Initial female processing time                     */
     rejg       = 0.0;   /* Initial female rejection probability               */
-    mim        = 0.1;   /* Mortality rate for time-in stage                   */
-    mom        = 0.1;   /* Mortality rate for time-out stage                  */
-    gam        = 20.0;  /* Offspring increase for nuptial gift                */
+    mim        = 1.0;   /* Mortality rate for time-in stage                   */
+    mom        = 1.0;   /* Mortality rate for time-out stage                  */
+    gam        = 6.0;   /* Offspring increase for nuptial gift                */
     mov        = 1.0;   /* Movement parameter                                 */
     a1         = 0.01;  /* Search time needed to find a gift                  */
-    lambd      = 8.0;   /* Baseline female reproduction                       */
-    xdim       = 20;    /* dimension of x-loc landscape                       */
-    ydim       = 20;    /* dimension of y-loc landscape                       */
+    lambd      = 6.0;   /* Baseline female reproduction                       */
+    xdim       = 10;    /* dimension of x-loc landscape                       */
+    ydim       = 10;    /* dimension of y-loc landscape                       */
     K          = 1000;  /* Population carrying capacity                       */
     /* =======================================================================*/
 
