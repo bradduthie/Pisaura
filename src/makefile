@@ -15,5 +15,5 @@ as183.o: as183.c
 	$(CC) $(CFLAGS) -c as183.c
 
 clean:
-	rm -rf *.o *.txt *.csv daj
+	rm -rf *.o *.txt *.csv *.csv# daj
 	find . -type f -name out\* -exec rm {} \;
