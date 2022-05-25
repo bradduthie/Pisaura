@@ -14,7 +14,7 @@
 
 int main(void){
 
-    int i, time_steps, N, rep, xdim, ydim, K;
+    int i, time_steps, N, rep, xdim, ydim, K, stats;
     double Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd;
 
     /* ======= VARIABLES BETWEEN THE Xs BELOW ADJUST MODEL PARAMETERS ========*/
@@ -22,26 +22,27 @@ int main(void){
     /* =======================================================================*/
     /* Model parameter values                                                 */
     /* =======================================================================*/
-    time_steps = 2;   /* Simulation time steps                               */
-    N          = 1000; /* Population size                                     */
+    time_steps = 4000; /* Simulation time steps                               */
+    N          = 10;   /* Population size                                     */
     Tm         = 0.0;  /* Initial male search time                            */
     Tf         = 1.0;  /* Initial female processing time                      */
     rejg       = 0.0;  /* Initial female rejection probability                */
     mim        = 1.0;  /* Mortality rate for time-in stage                    */
     mom        = 1.0;  /* Mortality rate for time-out stage                   */
-    gam        = 1.0;  /* Offspring increase for nuptial gift                 */
+    gam        = 4.0;  /* Offspring increase for nuptial gift                 */
     mov        = 1.0;  /* Movement parameter                                  */
     a1         = 0.4;  /* Search time needed to find a gift                   */
-    lambd      = 2.0;  /* Baseline female reproduction                        */
-    xdim       = 20;   /* dimension of x-loc landscape                        */
-    ydim       = 20;   /* dimension of y-loc landscape                        */
+    lambd      = 8.0;  /* Baseline female reproduction                        */
+    xdim       = 2;    /* dimension of x-loc landscape                        */
+    ydim       = 2;    /* dimension of y-loc landscape                        */
     K          = 1000; /* Population carrying capacity                        */
     /* =======================================================================*/
 
     /* =======================================================================*/
     /* Simulation details                                                     */
     /* =======================================================================*/
-    rep        = 1;     /* Simulations run                                    */
+    rep    = 1; /* Simulations run                                            */
+    stats  = 1; /* 0: end of time step, 1: each time step, 2: all inds        */
     /* =======================================================================*/
     /*  XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX   */
     /* =======================================================================*/
@@ -52,7 +53,7 @@ int main(void){
     while(i < rep){
 
         nuptials(time_steps, N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, 
-                 xdim, ydim, K);
+                 xdim, ydim, K, stats);
                  
         i++;
 

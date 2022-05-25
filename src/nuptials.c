@@ -311,21 +311,25 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
 /******************************************************************************/
 /* Apply the carrying capacity to inds and offspring                          */
 /******************************************************************************/
-void apply_K(double **inds, int N, double **offs, int off_N, int K){
+void apply_K(double **inds, int N, double **offs, int off_N, int K, int new_N){
 
-    int new_N, kill;
+    int old_N, kill;
 
-    new_N = N + off_N;
+    old_N = N + off_N;
 
     while(new_N > K){
-      kill = randunifint(0, new_N);
+      kill = randunifint(0, old_N - 1);
       if(kill < N){
-        inds[kill][18] = 1.0;
-        new_N--;
+        if(inds[kill][18] < 1.0){
+          inds[kill][18] = 1.0;
+          new_N--;
+        }
       }else{
-        kill           -= N;
-        offs[kill][18] =  1.0;
-        new_N--;
+        kill -= N;
+        if(offs[kill][18] < 1.0){        
+          offs[kill][18] =  1.0;
+          new_N--;
+        }
       }
     }
 }
@@ -382,51 +386,128 @@ void build_new_N_offs(double **inds, int N, double **offs, int off_N, int new_N,
 }
 
 /******************************************************************************/
+/* Apply the carrying capacity to inds and offspring                          */
+/******************************************************************************/
+void build_newN(double **inds, int N, int new_N, double **news, int ind_traits){
+
+    int row, col, new_row;
+
+    new_row = 0;
+    for(row = 0; row < N; row++){
+      if(inds[row][18] < 1.0){
+        for(col = 0; col < ind_traits; col++){
+          news[new_row][col] = inds[row][col];
+        }
+        new_row++;
+      }
+    }
+}
+
+/******************************************************************************/
+/* Get summary statistics                                                     */
+/******************************************************************************/
+void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
+              int off_N){
+
+    int row, col, pid;
+    double sex_ratio, time_in, Tm, Tf, Gift, RejPr, count;
+    char outfile[20];
+
+    FILE *fptr;
+
+    pid = getpid();
+
+    sprintf(outfile, "results_%d.csv", pid);
+    fptr = fopen(outfile, "a+");
+
+    switch(stats){
+      case 0:
+
+        break;
+      case 1:
+        sex_ratio = 0.0;
+        time_in   = 0.0;
+        Tm        = 0.0;
+        Tf        = 0.0;
+        Gift      = 0.0;
+        RejPr     = 0.0;
+        count     = 0.0;
+        for(row = 0; row < N; row++){
+            sex_ratio += inds[row][1];
+            time_in   += inds[row][4];
+            Tm        += inds[row][5];
+            Tf        += inds[row][6];
+            Gift      += inds[row][7];
+            RejPr     += inds[row][8];
+            count++;
+        }
+        sex_ratio = sex_ratio / count;
+        time_in   = time_in   / count;
+        Tm        = Tm        / count;
+        Tf        = Tf        / count;
+        Gift      = Gift      / count;
+        RejPr     = RejPr     / count;
+        fprintf(fptr, "%d,%f,%f,%f,%f,%f,%f,%d,%d\n", ts, sex_ratio, 
+                time_in, Tm, Tf, Gift, RejPr, off_N, N);
+        break;
+      case 2:
+        for(row = 0; row < N; row++){
+          fprintf(fptr, "%d,", ts);
+          for(col = 0; col < ind_traits; col++){
+            if(col < ind_traits - 1){
+               fprintf(fptr, "%f,", inds[row][col]);
+            }else{
+               fprintf(fptr, "%f", inds[row][col]);
+            }
+          }
+          fprintf(fptr, "\n");
+        }
+        break;
+
+    }
+}
+
+/******************************************************************************/
 /* Main outer function that runs a nuptial gift giving simulation over time   */
 /******************************************************************************/
 void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               double mim, double mom, double gam, double mov, double a1,
-              double lambd, int xdim, int ydim, int K){
+              double lambd, int xdim, int ydim, int K, int stats){
 
-    int ts, row, col, ind_traits, off_N, new_N, *ID;
+    int ts, row, ind_traits, off_N, new_N, *ID, pid;
     double **inds, **offs, **news;
-    
-    /* =======================================================================*/
-    /* DEFINE VARIABLES TO BE USED: */
-    /* =======================================================================*/
+    char outfile[20];
+
+    FILE *fptr;    
+
     ind_traits = 20;
     
+    if(stats < 2){
+      pid = getpid();
+      sprintf(outfile, "results_%d.csv", pid);
+      fptr = fopen(outfile, "a+");
+      fprintf(fptr, "Time, Sex_ratio, Time-in, Tm, Tf, Gift, RejPr, Offs, N\n");
+    }
+
     ID   = malloc(sizeof(int));
     inds = (double **) malloc(N * sizeof(double));
     for(row = 0; row < N; row++){
       inds[row] = (double *) malloc(ind_traits * sizeof(double));
     }
     
-
-    /* =======================================================================*/
-    /* INITIALISE INDIVIDUALS: */
-    /* =======================================================================*/
     initialise(N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, xdim, ydim, 
                inds);
     ID[0] = N;
     
     ts = 0;
     while(ts < time_steps){
-
-        /* ==========================================================*/
-        /* MOVE INDIVIDUALS                                          */
-        /* ==========================================================*/        
+   
         move_inds(inds, xdim, ydim, N);
 
-        /* ==========================================================*/
-        /* GET OFFSPRING                                             */
-        /* ==========================================================*/
         get_offspring(inds, N);
-        
-        /* ==========================================================*/
-        /* ADD OFFSPRING                                             */
-        /* ==========================================================*/
+
         off_N = count_offspring(inds, N);
+
         if(off_N > 0){   
           offs  = (double **) malloc(off_N * sizeof(double));
           for(row = 0; row < off_N; row++){
@@ -435,7 +516,9 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
           add_offspring(inds, N, offs, off_N, ind_traits, ID);
 
-          apply_K(inds, N, offs, off_N, K);
+          new_N = count_living(inds, N, offs, off_N);
+
+          apply_K(inds, N, offs, off_N, K, new_N);
 
           new_N = count_living(inds, N, offs, off_N);
 
@@ -443,7 +526,6 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
           for(row = 0; row < new_N; row++){
             news[row] = (double *) malloc(ind_traits * sizeof(double));
           }
-
 
           build_new_N_offs(inds, N, offs, off_N, new_N, news, ind_traits);
 
@@ -473,20 +555,42 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
         }else{
 
-         /* Just remove the dead ones and put it in a new array */
+          new_N = count_living(inds, N, offs, off_N);
+
+          news = (double **) malloc(new_N * sizeof(double));
+          for(row = 0; row < new_N; row++){
+            news[row] = (double *) malloc(ind_traits * sizeof(double));
+          }
+
+          build_newN(inds, N, new_N, news, ind_traits);
+
+          for(row = 0; row < N; row++){
+            free(inds[row]);
+          }
+          free(inds);
+       
+          N = new_N; 
+
+          inds = (double **) malloc(N * sizeof(double));
+          for(row = 0; row < N; row++){
+            inds[row] = (double *) malloc(ind_traits * sizeof(double));
+          }
+
+          swap_arrays((void*)&news, (void*)&inds); 
+
+          for(row = 0; row < new_N; row++){
+            free(news[row]);
+          }
+          free(news);
+
 
         }
 
+        sumstats(inds, N, ind_traits, stats, ts, off_N);
+        
         ts++;
         
         printf("Time step: %d\t%d\t%d\n", ts, N, off_N);
-    }
-
-    for(row = 0; row < N; row++){
-        for(col = 0; col < 6; col++){
-            printf("%f\t", inds[row][col]);
-        } 
-        printf("\n");
     }
 
     for(row = 0; row < N; row++){
