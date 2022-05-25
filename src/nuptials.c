@@ -39,7 +39,7 @@ void initialise(int N, double Tm, double Tf, double rejg, double mim,
       inds[row][1]  = randbinom(0.5);
       inds[row][2]  = randunifint(0, xdim - 1);
       inds[row][3]  = randunifint(0, ydim - 1);
-      inds[row][4]  = 1.0;
+      inds[row][4]  = 0.0;
       inds[row][5]  = Tm;
       inds[row][6]  = Tf;
       inds[row][7]  = 0.0;
@@ -101,7 +101,7 @@ void female_male_int(double **inds, int female, int male){
 
     rej_gift = inds[female][8];
     acceptml = randunif();
-    if(rej_gift < acceptml){
+    if(rej_gift < acceptml || inds[male][7] > 0){
       male_add         = inds[male][11] * inds[male][7];
       birth_par        = inds[female][17] + male_add;
       offspring        = randpois(birth_par);
@@ -140,16 +140,14 @@ void male_search(double **inds, int male){
   iTm        = inds[male][5];
   a1         = inds[male][13];
   
-  gift_prob  = 1 - exp(-1 * (1 / a1) * iTm);
+  gift_prob  = 1 - exp(-1.0 * (1.0 / a1) * iTm);
   gift_rand  = randunif();
   if(isin == 0 && gift_rand < gift_prob){
     inds[male][7]  = 1.0;
     inds[male][4]  = 1.0;
     inds[male][20] = 1.0;
-  }else{
-    inds[male][20] = 0.0;
   }
-  enter_prob = exp(-1 * iTm);
+  enter_prob = exp(-1.0 * iTm);
   enter_rand = randunif();
   if(enter_rand < enter_prob){
     inds[male][4] = 1.0;
@@ -167,10 +165,10 @@ void ind_mortality(double **inds, int i){
   rand_mort = randunif();
   if(in_or_out > 0){
     in_mort  = inds[i][9];
-    mort_pr  = 1 - exp(-1 * in_mort);
+    mort_pr  = 1.0 - exp(-1.0 * in_mort);
   }else{
     out_mort = inds[i][10];
-    mort_pr  = 1 - exp(-1 * out_mort);
+    mort_pr  = 1.0 - exp(-1.0 * out_mort);
   }
   if(rand_mort < mort_pr){
     inds[i][18] = 1.0;
@@ -259,7 +257,7 @@ double off_trait(double **inds, int mum_row, int dad_row, int trait_col){
     double p_mean, mu_val, off_val;
 
     p_mean = 0.5 * (inds[mum_row][trait_col] + inds[dad_row][trait_col]);
-    mu_val = randnorm(0, 0.04);
+    mu_val = randnorm(0, 0.02);
 
     off_val = p_mean + mu_val;
     if(off_val < 0.0){
