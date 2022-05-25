@@ -250,7 +250,7 @@ int find_dad(double **inds, int N, double dad_ID){
 /******************************************************************************/
 double off_trait(double **inds, int mum_row, int dad_row, int trait_col){
     
-    double p_mean, mu_val;
+    double p_mean, mu_val, off_val;
 
     p_mean = 0.5 * (inds[mum_row][trait_col] + inds[dad_row][trait_col]);
     mu_val = randnorm(0, 0.02);
@@ -270,12 +270,11 @@ double off_trait(double **inds, int mum_row, int dad_row, int trait_col){
 void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
                    int *ID){
 
-    int mum_row, off_pos, mum_ID, dad_ID;
+    int mum_row, dad_row, off_pos, dad_ID;
 
     off_pos = 0;
     for(mum_row = 0; mum_row < N; mum_row++){
         while(inds[mum_row][14] > 0){
-            mum_ID   = inds[mum_row][0];
             dad_ID   = inds[mum_row][19];
             dad_row  = find_dad(inds, N, dad_ID);
             /* Inserting offspring traits below */
@@ -283,7 +282,7 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
             offs[off_pos][1]  = randbinom(0.5);
             offs[off_pos][2]  = inds[mum_row][2];
             offs[off_pos][3]  = inds[mum_row][3];
-            offs[off_pos][4]  = 1.0
+            offs[off_pos][4]  = 1.0;
             offs[off_pos][5]  = off_trait(inds, mum_row, dad_row, 5);
             offs[off_pos][6]  = off_trait(inds, mum_row, dad_row, 6);
             offs[off_pos][7]  = 0.0;
@@ -446,8 +445,24 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
           build_new_N_offs(inds, N, offs, off_N, new_N, news, ind_traits);
 
-          /* Need to now change N and get the news into inds */
+          for(row = 0; row < N; row++){
+            free(inds[row]);
+          }
+          free(inds);
+          
+          N = new_N;
 
+          inds = (double **) malloc(N * sizeof(double));
+          for(row = 0; row < N; row++){
+            inds[row] = (double *) malloc(ind_traits * sizeof(double));
+          }
+
+          swap_arrays((void*)&news, (void*)&inds);
+
+          for(row = 0; row < new_N; row++){
+            free(news[row]);
+          }
+          free(news);
 
           for(row = 0; row < off_N; row++){
               free(offs[row]);
@@ -460,45 +475,18 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
         }
 
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-/*
-
-        swap_arrays((void*)&(olds), (void*)&inds);
-
-        inds = (double **) malloc(new_N * sizeof(double));
-        for(row = 0; row < N; row++){
-            inds[row] = (double *) malloc(ind_traits * sizeof(double));
-        }
-*/
-        /* ==========================================================*/
-        /* REMOVE DEAD                                               */
-        /* ==========================================================*/
-
         ts++;
         
         printf("Time step: %d\t%d\t%d\n", ts, N, off_N);
     }
-/*
+
     for(row = 0; row < N; row++){
         for(col = 0; col < 6; col++){
             printf("%f\t", inds[row][col]);
         } 
         printf("\n");
     }
-*/
+
     for(row = 0; row < N; row++){
       free(inds[row]);
     }

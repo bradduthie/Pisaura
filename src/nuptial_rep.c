@@ -14,7 +14,7 @@
 
 int main(void){
 
-    int i, time_steps, N, rep, xdim, ydim;
+    int i, time_steps, N, rep, xdim, ydim, K;
     double Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd;
 
     /* ======= VARIABLES BETWEEN THE Xs BELOW ADJUST MODEL PARAMETERS ========*/
@@ -22,7 +22,7 @@ int main(void){
     /* =======================================================================*/
     /* Model parameter values                                                 */
     /* =======================================================================*/
-    time_steps = 40;   /* Simulation time steps                               */
+    time_steps = 2;   /* Simulation time steps                               */
     N          = 1000; /* Population size                                     */
     Tm         = 0.0;  /* Initial male search time                            */
     Tf         = 1.0;  /* Initial female processing time                      */
