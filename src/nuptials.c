@@ -433,37 +433,42 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
           }
 
           add_offspring(inds, N, offs, off_N, ind_traits, ID);
-
+/*
           apply_K(inds, N, offs, off_N, K);
 
           new_N = count_living(inds, N, offs, off_N);
-
+*/
+/*
           news = (double **) malloc(new_N * sizeof(double));
           for(row = 0; row < new_N; row++){
             news[row] = (double *) malloc(ind_traits * sizeof(double));
           }
 
+*/
+/*
           build_new_N_offs(inds, N, offs, off_N, new_N, news, ind_traits);
+  */        
 
+ /*
           for(row = 0; row < N; row++){
             free(inds[row]);
           }
           free(inds);
-          
-          N = new_N;
+   */       
+          /* N = new_N; 
 
           inds = (double **) malloc(N * sizeof(double));
           for(row = 0; row < N; row++){
             inds[row] = (double *) malloc(ind_traits * sizeof(double));
           }
 
-          swap_arrays((void*)&news, (void*)&inds);
-
+          swap_arrays((void*)&news, (void*)&inds); */
+/*
           for(row = 0; row < new_N; row++){
             free(news[row]);
           }
           free(news);
-
+*/
           for(row = 0; row < off_N; row++){
               free(offs[row]);
           }
