@@ -190,17 +190,17 @@ void get_offspring(double **inds, int N){
               jyloc = (int) inds[j][3];
               jisin = (int) inds[j][4];
               if(jxloc == ixloc && jyloc == iyloc && jsex == 0 && jisin > 0){
-                   /* female_male_int(inds, i, j); */
+                   female_male_int(inds, i, j);
               }
           }
         }
         if(iisin == 0 && isex == 0){
-           /* female_enter(inds, row); */
+           female_enter(inds, row);
         }
         if(iisin == 0 && isex == 1){
-           /* male_search(inds, row); */
+           male_search(inds, row);
         }
-        /* ind_mortality(inds, i); */
+        ind_mortality(inds, i);
     }
 
     free(IDs);
@@ -213,7 +213,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               double mim, double mom, double gam, double mov, double a1,
               double lambd, int xdim, int ydim){
 
-    int ts, row, ind_traits;
+    int ts, row, col, ind_traits;
     double **inds;
     
     /* =======================================================================*/
@@ -249,6 +249,8 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         /* ADD OFFSPRING                                             */
         /* ==========================================================*/
         
+        /* XXX XXX CHECK get_offspring XXX But left off HERE XXX XXX */
+
         /* ==========================================================*/
         /* REMOVE DEAD                                               */
         /* ==========================================================*/
@@ -260,6 +262,13 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         ts++;
         
         printf("Time step: %d\n", ts);
+    }
+
+    for(row = 0; row < N; row++){
+        for(col = 0; col < 6; col++){
+            printf("%f\t", inds[row][col]);
+        } 
+        printf("\n");
     }
 
     for(row = 0; row < N; row++){
