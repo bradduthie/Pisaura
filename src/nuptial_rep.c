@@ -44,7 +44,7 @@ int main(void){
     /* Simulation details                                                     */
     /* =======================================================================*/
     rep    = 1; /* Simulations run                                            */
-    stats  = 1; /* 0: end of time step, 1: each time step, 2: all inds        */
+    stats  = 0; /* 0: end of time step, 1: each time step, 2: all inds        */
     /* =======================================================================*/
     /*  XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX   */
     /* =======================================================================*/
@@ -59,6 +59,7 @@ int main(void){
                  
         i++;
 
+        printf("Rep: %d of %d\n", i, rep);
     }
     return 0;
 }

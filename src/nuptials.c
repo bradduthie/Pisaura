@@ -409,7 +409,9 @@ void build_newN(double **inds, int N, int new_N, double **news, int ind_traits){
 /* Get summary statistics                                                     */
 /******************************************************************************/
 void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
-              int off_N){
+              int off_N, int time_steps, double mim, double mom, double gam, 
+              double mov, double a1, double lambd, int xdim, int ydim, int K,
+              double Tm_init, double rg_init, double Tm_mu, double rg_mu){
 
     int row, col, pid;
     double sex_ratio, time_in, Tm, Tf, Gift, RejPr, count, mcount, fcount;
@@ -426,7 +428,51 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
 
     switch(stats){
       case 0:
-
+        if(ts == time_steps - 1){
+          sex_ratio = 0.0;
+          time_in   = 0.0;
+          Tm        = 0.0;
+          Tf        = 0.0;
+          Gift      = 0.0;
+          RejPr     = 0.0;
+          count     = 0.0;
+          fcount    = 0.0;
+          mcount    = 0.0;
+          for(row = 0; row < N; row++){
+              sex_ratio += inds[row][1];
+              time_in   += inds[row][4];
+              Tm        += inds[row][5];
+              Tf        += inds[row][6];
+              Gift      += inds[row][20];
+              RejPr     += inds[row][8];
+              count++;
+              if(inds[row][1] == 0){
+                  fcount++;
+              }
+              if(inds[row][1] == 1){
+                  mcount++;
+              }
+          }
+          sex_ratio_m = sex_ratio / count;
+          time_in_m   = time_in   / count;
+          Tm_m        = Tm        / count;
+          Tf_m        = Tf        / count;
+          Gift_m      = Gift      / mcount;
+          RejPr_m     = RejPr     / fcount;
+          SS_Tm       = 0.0;
+          SS_Rj       = 0.0;
+          for(row = 0; row < N; row++){
+              SS_Tm += (inds[row][5] - Tm_m) * (inds[row][5] - Tm_m);
+              SS_Rj += (inds[row][8] - RejPr_m) * (inds[row][8] - RejPr_m);
+          }
+          Vr_Tm = SS_Tm / (N - 1);
+          Vr_Rj = SS_Rj / (N - 1);
+          fprintf(fptr, "%f,%f,%f,%f,%f,%f,%d,%d,%d,%f,%f,%f,%f,%d,%f,%f,%f,%f,\
+                         %f,%f,%d,%d,%f,%f\n", mim, mom, gam, mov, a1, lambd,
+                         xdim, ydim, K, Tm_init, rg_init, Tm_mu, rg_mu, ts, 
+                         sex_ratio_m, time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m, 
+                         off_N, N, Vr_Tm, Vr_Rj);
+        }
         break;
       case 1:
         sex_ratio = 0.0;
@@ -505,12 +551,21 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
     ind_traits = 21;
     
-    if(stats == 2){
+    if(stats == 1){
       pid = getpid();
       sprintf(outfile, "results_%d.csv", pid);
       fptr = fopen(outfile, "a+");
       fprintf(fptr, "Time,Sex_ratio,Time-in,Tm,Tf,Gift,RejPr,Offs,N,Vr_Tm,\
                      Vr_Rj\n");
+      fclose(fptr);
+    }
+    if(stats == 0){
+      pid = getpid();
+      sprintf(outfile, "results_%d.csv", pid);
+      fptr = fopen(outfile, "a+");
+      fprintf(fptr, "mim,mom,gam,mov,a1,lambd,xdim,ydim,K,Tm_init,rg_init,\
+                     Tm_mu,rg_mu,Time,Sex_ratio,Time-in,Tm,Tf,Gift,RejPr,Offs,\
+                     N,Vr_Tm,Vr_Rj\n");
       fclose(fptr);
     }
 
@@ -533,7 +588,8 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
         off_N = count_offspring(inds, N);
 
-        sumstats(inds, N, ind_traits, stats, ts, off_N);
+        sumstats(inds, N, ind_traits, stats, ts, off_N, time_steps, mim, mom,
+                 gam, mov, a1, lambd, xdim, ydim, K, Tm, rejg, Tm_mu, rg_mu);
 
         if(off_N > 0){   
           offs  = (double **) malloc(off_N * sizeof(double));
@@ -615,7 +671,9 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         
         ts++;
         
-        printf("Time step: %d\t%d\t%d\n", ts, N, off_N);
+        if(stats > 0){
+          printf("Time step: %d\t%d\t%d\n", ts, N, off_N);
+        }
     }
 
     for(row = 0; row < N; row++){
