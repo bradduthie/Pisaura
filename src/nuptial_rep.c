@@ -15,7 +15,7 @@
 int main(void){
 
     int i, time_steps, N, rep, xdim, ydim, K, stats;
-    double Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd;
+    double Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, Tm_mu, rg_mu;
 
     /* ======= VARIABLES BETWEEN THE Xs BELOW ADJUST MODEL PARAMETERS ========*/
     /*  XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX   */
@@ -29,13 +29,15 @@ int main(void){
     rejg       = 0.0;   /* Initial female rejection probability               */
     mim        = 1.0;   /* Mortality rate for time-in stage                   */
     mom        = 1.0;   /* Mortality rate for time-out stage                  */
-    gam        = 0.0;   /* Offspring increase for nuptial gift                */
+    gam        = 8.0;   /* Offspring increase for nuptial gift                */
     mov        = 1.0;   /* Movement parameter                                 */
     a1         = 1.0;   /* Search time needed to find a gift                  */
     lambd      = 6.0;   /* Baseline female reproduction                       */
     xdim       = 10;    /* dimension of x-loc landscape                       */
     ydim       = 10;    /* dimension of y-loc landscape                       */
     K          = 1000;  /* Population carrying capacity                       */
+    Tm_mu      = 0.02;  /* Error of offspring Tm from mean parent             */
+    rg_mu      = 0.00;  /* Error of offspring rejg from mean parent           */
     /* =======================================================================*/
 
     /* =======================================================================*/
@@ -53,7 +55,7 @@ int main(void){
     while(i < rep){
 
         nuptials(time_steps, N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, 
-                 xdim, ydim, K, stats);
+                 xdim, ydim, K, stats, Tm_mu, rg_mu);
                  
         i++;
 

@@ -252,17 +252,15 @@ int find_dad(double **inds, int N, double dad_ID){
 /******************************************************************************/
 /* Offspring trait from mum and dad                                           */
 /******************************************************************************/
-double off_trait(double **inds, int mum_row, int dad_row, int trait_col){
+double off_trait(double **inds, int mum_row, int dad_row, int trait_col, 
+                 double mu){
     
     double p_mean, mu_val, off_val;
 
     p_mean = 0.5 * (inds[mum_row][trait_col] + inds[dad_row][trait_col]);
-    mu_val = randnorm(0, 0.02);
+    mu_val = randnorm(0, mu);
 
     off_val = p_mean + mu_val;
-    if(off_val < 0.0){
-        off_val = 0.0;
-    }
 
     return off_val;
 }
@@ -272,7 +270,7 @@ double off_trait(double **inds, int mum_row, int dad_row, int trait_col){
 /* Add offspring to a new array                                               */
 /******************************************************************************/
 void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
-                   int *ID){
+                   int *ID, double Tm_mu, double rg_mu){
 
     int mum_row, dad_row, off_pos, dad_ID;
 
@@ -287,10 +285,10 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
             offs[off_pos][2]  = inds[mum_row][2];
             offs[off_pos][3]  = inds[mum_row][3];
             offs[off_pos][4]  = 1.0;
-            offs[off_pos][5]  = off_trait(inds, mum_row, dad_row, 5);
-            offs[off_pos][6]  = 0.5 * (inds[mum_row][6] + inds[dad_row][6]);
+            offs[off_pos][5]  = off_trait(inds, mum_row, dad_row, 5, Tm_mu);
+            offs[off_pos][6]  = off_trait(inds, mum_row, dad_row, 6, 0.0);
             offs[off_pos][7]  = 0.0;
-            offs[off_pos][8]  = off_trait(inds, mum_row, dad_row, 8);
+            offs[off_pos][8]  = off_trait(inds, mum_row, dad_row, 8, rg_mu);
             offs[off_pos][9]  = inds[mum_row][9];
             offs[off_pos][10] = inds[mum_row][10];
             offs[off_pos][11] = inds[mum_row][11];
@@ -415,7 +413,8 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
 
     int row, col, pid;
     double sex_ratio, time_in, Tm, Tf, Gift, RejPr, count, mcount, fcount;
-    double sex_ratio_m, time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m;
+    double sex_ratio_m, time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m, SS_Tm, SS_Rj;
+    double Vr_Tm, Vr_Rj;
     char outfile[17];
 
     FILE *fptr;
@@ -460,8 +459,16 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         Tf_m        = Tf        / count;
         Gift_m      = Gift      / mcount;
         RejPr_m     = RejPr     / fcount;
-        fprintf(fptr, "%d,%f,%f,%f,%f,%f,%f,%d,%d\n", ts, sex_ratio_m, 
-                time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m, off_N, N);
+        SS_Tm       = 0.0;
+        SS_Rj       = 0.0;
+        for(row = 0; row < N; row++){
+            SS_Tm += (inds[row][5] - Tm_m) * (inds[row][5] - Tm_m);
+            SS_Rj += (inds[row][8] - RejPr_m) * (inds[row][8] - RejPr_m);
+        }
+        Vr_Tm = SS_Tm / (N - 1);
+        Vr_Rj = SS_Rj / (N - 1);
+        fprintf(fptr, "%d,%f,%f,%f,%f,%f,%f,%d,%d,%f,%f\n", ts, sex_ratio_m, 
+                time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m, off_N, N, Vr_Tm, Vr_Rj);
         break;
       case 2:
         for(row = 0; row < N; row++){
@@ -487,7 +494,8 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
 /******************************************************************************/
 void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               double mim, double mom, double gam, double mov, double a1,
-              double lambd, int xdim, int ydim, int K, int stats){
+              double lambd, int xdim, int ydim, int K, int stats, 
+              double Tm_mu, double rg_mu){
 
     int ts, row, ind_traits, off_N, new_N, *ID, pid;
     double **inds, **offs, **news;
@@ -497,11 +505,12 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
     ind_traits = 21;
     
-    if(stats < 2){
+    if(stats == 2){
       pid = getpid();
       sprintf(outfile, "results_%d.csv", pid);
       fptr = fopen(outfile, "a+");
-      fprintf(fptr, "Time, Sex_ratio, Time-in, Tm, Tf, Gift, RejPr, Offs, N\n");
+      fprintf(fptr, "Time,Sex_ratio,Time-in,Tm,Tf,Gift,RejPr,Offs,N,Vr_Tm,\
+                     Vr_Rj\n");
       fclose(fptr);
     }
 
@@ -532,7 +541,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               offs[row] = (double *) malloc(ind_traits * sizeof(double));
           }
 
-          add_offspring(inds, N, offs, off_N, ind_traits, ID);
+          add_offspring(inds, N, offs, off_N, ind_traits, ID, Tm_mu, rg_mu);
 
           new_N = count_living(inds, N, offs, off_N);
 
