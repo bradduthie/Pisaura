@@ -288,7 +288,7 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
             offs[off_pos][5]  = off_trait(inds, mum_row, dad_row, 5, Tm_mu);
             offs[off_pos][6]  = off_trait(inds, mum_row, dad_row, 6, 0.0);
             offs[off_pos][7]  = 0.0;
-            offs[off_pos][8]  = off_trait(inds, mum_row, dad_row, 8, rg_mu);
+            offs[off_pos][8]  = off_trait(inds, mum_row, dad_row, 8, 0);
             offs[off_pos][9]  = inds[mum_row][9];
             offs[off_pos][10] = inds[mum_row][10];
             offs[off_pos][11] = inds[mum_row][11];
@@ -458,7 +458,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
           Tm_m        = Tm        / count;
           Tf_m        = Tf        / count;
           Gift_m      = Gift      / mcount;
-          RejPr_m     = RejPr     / fcount;
+          RejPr_m     = RejPr     / count;
           SS_Tm       = 0.0;
           SS_Rj       = 0.0;
           for(row = 0; row < N; row++){
@@ -504,7 +504,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         Tm_m        = Tm        / count;
         Tf_m        = Tf        / count;
         Gift_m      = Gift      / mcount;
-        RejPr_m     = RejPr     / fcount;
+        RejPr_m     = RejPr     / count;
         SS_Tm       = 0.0;
         SS_Rj       = 0.0;
         for(row = 0; row < N; row++){
@@ -557,15 +557,6 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
       fptr = fopen(outfile, "a+");
       fprintf(fptr, "Time,Sex_ratio,Time-in,Tm,Tf,Gift,RejPr,Offs,N,Vr_Tm,\
                      Vr_Rj\n");
-      fclose(fptr);
-    }
-    if(stats == 0){
-      pid = getpid();
-      sprintf(outfile, "results_%d.csv", pid);
-      fptr = fopen(outfile, "a+");
-      fprintf(fptr, "mim,mom,gam,mov,a1,lambd,xdim,ydim,K,Tm_init,rg_init,\
-                     Tm_mu,rg_mu,Time,Sex_ratio,Time-in,Tm,Tf,Gift,RejPr,Offs,\
-                     N,Vr_Tm,Vr_Rj\n");
       fclose(fptr);
     }
 
