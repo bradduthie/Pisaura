@@ -36,7 +36,7 @@ int main(void){
     a1         = 0.10;  /* Search time needed to find a gift                  */
     lambd      = 8.0;   /* Baseline female reproduction                       */
     xdim       = 1;     /* dimension of x-loc landscape                       */
-    ydim       = 1      /* dimension of y-loc landscape                       */
+    ydim       = 1;     /* dimension of y-loc landscape                       */
     K          = 1000;  /* Population carrying capacity                       */
     Tm_mu      = 0.02;  /* Error of offspring Tm from mean parent             */
     rg_mu      = 0.00;  /* Error of offspring rejg from mean parent           */
