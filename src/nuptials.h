@@ -8,7 +8,7 @@ void initialise(int N, double Tm, double Tf, double rejg, double mim,
 
 void move_inds(double **inds, int xdim, int ydim, int N);
 
-void female_male_int(double **inds, int female, int male);
+void female_male_int(double **inds, int male, int female);
 
 void female_enter(double **inds, int female);
 

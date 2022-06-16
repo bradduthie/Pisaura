@@ -95,7 +95,7 @@ void move_inds(double **inds, int xdim, int ydim, int N){
 /******************************************************************************/
 /* Female and male interaction                                                */
 /******************************************************************************/
-void female_male_int(double **inds, int female, int male){
+void female_male_int(double **inds, int male, int female){
 
     double rej_gift, acceptml, male_add, birth_par, offspring;
 
@@ -288,7 +288,7 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
             offs[off_pos][5]  = off_trait(inds, mum_row, dad_row, 5, Tm_mu);
             offs[off_pos][6]  = off_trait(inds, mum_row, dad_row, 6, 0.0);
             offs[off_pos][7]  = 0.0;
-            offs[off_pos][8]  = off_trait(inds, mum_row, dad_row, 8, 0);
+            offs[off_pos][8]  = off_trait(inds, mum_row, dad_row, 8, rg_mu);
             offs[off_pos][9]  = inds[mum_row][9];
             offs[off_pos][10] = inds[mum_row][10];
             offs[off_pos][11] = inds[mum_row][11];

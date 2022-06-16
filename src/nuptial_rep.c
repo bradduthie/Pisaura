@@ -25,27 +25,27 @@ int main(void){
     /* Model parameter values                                                 */
     /* =======================================================================*/
     time_steps = 1000;  /* Simulation time steps                              */
-    N          = 2000;  /* Population size                                    */
+    N          = 1000;  /* Population size                                    */
     Tm         = 0.0;   /* Initial male search time                           */
-    Tf         = 1.0;   /* Initial female processing time                     */
-    rejg       = 0.5;   /* Initial female rejection probability               */
+    Tf         = 2.0;   /* Initial female processing time                     */
+    rejg       = 0.0;   /* Initial female rejection probability               */
     mim        = 0.1;   /* Mortality rate for time-in stage                   */
     mom        = 0.1;   /* Mortality rate for time-out stage                  */
     gam        = 0.0;   /* Offspring increase for nuptial gift                */
     mov        = 1.0;   /* Movement parameter                                 */
-    a1         = 0.10;  /* Search time needed to find a gift                  */
+    a1         = 0.40;  /* Search time needed to find a gift                  */
     lambd      = 8.0;   /* Baseline female reproduction                       */
-    xdim       = 1;     /* dimension of x-loc landscape                       */
-    ydim       = 1;     /* dimension of y-loc landscape                       */
-    K          = 1000;  /* Population carrying capacity                       */
-    Tm_mu      = 0.02;  /* Error of offspring Tm from mean parent             */
-    rg_mu      = 0.00;  /* Error of offspring rejg from mean parent           */
+    xdim       = 10;    /* dimension of x-loc landscape                       */
+    ydim       = 10;    /* dimension of y-loc landscape                       */
+    K          = 4000;  /* Population carrying capacity                       */
+    Tm_mu      = 0.01;  /* Error of offspring Tm from mean parent             */
+    rg_mu      = 0.01;  /* Error of offspring rejg from mean parent           */
     /* =======================================================================*/
 
     /* =======================================================================*/
     /* Simulation details                                                     */
     /* =======================================================================*/
-    rep    = 1000; /* Simulations run                                         */
+    rep    = 2200; /* Simulations run                                         */
     stats  = 0;   /* 0: end of time step, 1: each time step, 2: all inds      */
     /* =======================================================================*/
     /*  XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX   */
@@ -71,8 +71,8 @@ int main(void){
                  
         i++;
 
-        if(i % 200 == 0){
-          gam += 1.0;
+        if(i % 100 == 0){
+          gam += 0.2;
         }
 
         printf("Rep: %d of %d\n", i, rep);
