@@ -39,7 +39,11 @@ void initialise(int N, double Tm, double Tf, double rejg, double mim,
       inds[row][1]  = randbinom(0.5);
       inds[row][2]  = randunifint(0, xdim - 1);
       inds[row][3]  = randunifint(0, ydim - 1);
-      inds[row][4]  = 0.0;
+      if(inds[row][1] == 0.0){
+          inds[row][4]  = 1.0;
+      }else{
+          inds[row][4]  = 0.0;
+      }
       inds[row][5]  = Tm;
       inds[row][6]  = Tf;
       inds[row][7]  = 0.0;
@@ -144,31 +148,17 @@ void male_search(double **inds, int male){
   isin       = (int) inds[male][4];
   iTm        = inds[male][5];
   a1         = inds[male][13];
-  
-  /* Tweaking: Gift probability in 1 time step should not depend on iTm? */
-  /*
-  gift_prob  = 1 - exp(-1.0 * (1.0 / a1) * iTm);
-  gift_rand  = randunif();
-  if(isin == 0 && gift_rand < gift_prob){
-    inds[male][7]  = 1.0;
-    inds[male][4]  = 1.0;
-    inds[male][20] = 1.0;
-  }
-  enter_prob = exp(-1.0 * iTm);
-  enter_rand = randunif();
-  if(enter_rand < enter_prob){
-    inds[male][4] = 1.0;
-  }
-  */
-  
-  /* Re-ordering this. *First* check if males stay outside of the mating pool */
-  /* If they do, then see if they get a nuptial gift */
+
   enter_prob = exp(-1.0 * iTm);
   enter_rand = randunif();
   if(enter_rand < enter_prob){
     inds[male][4] = 1.0;
   }else{
-    gift_prob  = 1 - exp(-1.0 * (1.0 / a1));
+    if(a1 == 0){
+        gift_prob = 1;
+    }else{
+        gift_prob  = 1 - exp(-1 / a1);
+    }
     gift_rand  = randunif();
     if(isin == 0 && gift_rand < gift_prob){
       inds[male][7]  = 1.0;
@@ -203,6 +193,39 @@ void ind_mortality(double **inds, int i){
 /******************************************************************************/
 /* Get offspring numbers                                                      */
 /******************************************************************************/
+void mortality(double **inds, int N){
+
+    int row; 
+    
+    for(row = 0; row < N; row++){
+        ind_mortality(inds, row);
+    }
+}
+
+
+/******************************************************************************/
+/* Offspring enter mating pool                                                */
+/******************************************************************************/
+void enter_mating_pool(double **inds, int N){
+
+    int row, isex, iisin; 
+    
+    for(row = 0; row < N; row++){
+        isex  = (int) inds[row][1];
+        iisin = (int) inds[row][4];
+
+        if(iisin == 0 && isex == 0){
+           female_enter(inds, row);
+        }
+        if(iisin == 0 && isex == 1){
+           male_search(inds, row);
+        }
+    }
+}
+
+/******************************************************************************/
+/* Get offspring numbers                                                      */
+/******************************************************************************/
 void get_offspring(double **inds, int N){
 
     int i, j, row, isex, ixloc, iyloc, iisin, jsex, jxloc, jyloc, jisin; 
@@ -230,16 +253,10 @@ void get_offspring(double **inds, int N){
               jisin = (int) inds[j][4];
               if(jxloc == ixloc && jyloc == iyloc && jsex == 0 && jisin > 0){
                    female_male_int(inds, i, j);
+                   break; /* Male leaves mating pool */
               }
           }
         }
-        if(iisin == 0 && isex == 0){
-           female_enter(inds, row);
-        }
-        if(iisin == 0 && isex == 1){
-           male_search(inds, row);
-        }
-        ind_mortality(inds, i);
     }
 
     free(IDs);
@@ -308,7 +325,7 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
             offs[off_pos][1]  = randbinom(0.5);
             offs[off_pos][2]  = inds[mum_row][2];
             offs[off_pos][3]  = inds[mum_row][3];
-            offs[off_pos][4]  = 1.0;
+            offs[off_pos][4]  = 0.0;
             offs[off_pos][5]  = off_trait(inds, mum_row, dad_row, 5, Tm_mu);
             offs[off_pos][6]  = off_trait(inds, mum_row, dad_row, 6, 0.0);
             offs[off_pos][7]  = 0.0;
@@ -490,7 +507,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
           Tf_m        = Tf        / count;
           Gift_m      = Gift      / mcount;
           RejPr_m     = RejPr     / count;
-          M_m         = M_tot     / count;
+          M_m         = M_tot     / time_in;
           N_m         = N_tot     / count;
           SS_Tm       = 0.0;
           SS_Rj       = 0.0;
@@ -542,7 +559,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         Tf_m        = Tf        / count;
         Gift_m      = Gift      / mcount;
         RejPr_m     = RejPr     / count;
-        M_m         = M_tot     / count;
+        M_m         = M_tot     / time_in;
         N_m         = N_tot     / count;
         SS_Tm       = 0.0;
         SS_Rj       = 0.0;
@@ -619,7 +636,11 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
    
         move_inds(inds, xdim, ydim, N);
 
+        enter_mating_pool(inds, N);
+
         get_offspring(inds, N);
+
+        mortality(inds, N);
 
         off_N = count_offspring(inds, N);
 

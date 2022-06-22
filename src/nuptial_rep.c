@@ -24,7 +24,7 @@ int main(void){
     /* =======================================================================*/
     /* Model parameter values                                                 */
     /* =======================================================================*/
-    time_steps = 40000; /* Simulation time steps                              */
+    time_steps = 20000; /* Simulation time steps                              */
     N          = 1000;  /* Population size                                    */
     Tm         = 0.0;   /* Initial male search time                           */
     Tf         = 2.0;   /* Initial female processing time                     */
@@ -32,11 +32,11 @@ int main(void){
     mim        = 0.01;  /* Mortality rate for time-in stage                   */
     mom        = 0.01;  /* Mortality rate for time-out stage                  */
     gam        = 0.0;   /* Offspring increase for nuptial gift                */
-    mov        = 10.0;  /* Movement parameter                                 */
+    mov        = 0.0;   /* Movement parameter                                 */
     a1         = 0.00;  /* Search time needed to find a gift                  */
     lambd      = 1.0;   /* Baseline female reproduction                       */
-    xdim       = 10;    /* dimension of x-loc landscape                       */
-    ydim       = 10;    /* dimension of y-loc landscape                       */
+    xdim       = 1;     /* dimension of x-loc landscape                       */
+    ydim       = 1;     /* dimension of y-loc landscape                       */
     K          = 1000;  /* Population carrying capacity                       */
     Tm_mu      = 0.01;  /* Error of offspring Tm from mean parent             */
     rg_mu      = 0.01;  /* Error of offspring rejg from mean parent           */
@@ -46,7 +46,7 @@ int main(void){
     /* =======================================================================*/
     /* Simulation details                                                     */
     /* =======================================================================*/
-    rep    = 2200; /* Simulations run                                         */
+    rep    = 10;  /* Simulations run                                         */
     stats  = 0;    /* 0: end of time step, 1: each time step, 2: all inds     */
     /* =======================================================================*/
     /*  XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX   */
@@ -73,7 +73,7 @@ int main(void){
         i++;
 
         if(i % 100 == 0){
-          gam += 0.2;
+          gam += 0.1;
         }
 
         printf("Rep: %d of %d\n", i, rep);

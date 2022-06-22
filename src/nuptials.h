@@ -16,6 +16,10 @@ void male_search(double **inds, int male);
 
 void ind_mortality(double **inds, int i);
 
+void mortality(double **inds, int N);
+
+void enter_mating_pool(double **inds, int N);
+
 void get_offspring(double **inds, int N);
 
 int count_offspring(double **inds, int N);
