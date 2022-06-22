@@ -56,6 +56,8 @@ void initialise(int N, double Tm, double Tf, double rejg, double mim,
       inds[row][18] = 0.0;
       inds[row][19] = 0.0;
       inds[row][20] = 0.0;
+      inds[row][21] = 0.0;
+      inds[row][22] = 0.0;
     }
 
 }
@@ -99,6 +101,9 @@ void female_male_int(double **inds, int male, int female){
 
     double rej_gift, acceptml, male_add, birth_par, offspring;
 
+    inds[female][21]++;
+    inds[male][21]++;
+  
     rej_gift = inds[female][8];
     acceptml = randunif();
     if(rej_gift < acceptml || inds[male][7] > 0){
@@ -140,6 +145,8 @@ void male_search(double **inds, int male){
   iTm        = inds[male][5];
   a1         = inds[male][13];
   
+  /* Tweaking: Gift probability in 1 time step should not depend on iTm? */
+  /*
   gift_prob  = 1 - exp(-1.0 * (1.0 / a1) * iTm);
   gift_rand  = randunif();
   if(isin == 0 && gift_rand < gift_prob){
@@ -151,6 +158,23 @@ void male_search(double **inds, int male){
   enter_rand = randunif();
   if(enter_rand < enter_prob){
     inds[male][4] = 1.0;
+  }
+  */
+  
+  /* Re-ordering this. *First* check if males stay outside of the mating pool */
+  /* If they do, then see if they get a nuptial gift */
+  enter_prob = exp(-1.0 * iTm);
+  enter_rand = randunif();
+  if(enter_rand < enter_prob){
+    inds[male][4] = 1.0;
+  }else{
+    gift_prob  = 1 - exp(-1.0 * (1.0 / a1));
+    gift_rand  = randunif();
+    if(isin == 0 && gift_rand < gift_prob){
+      inds[male][7]  = 1.0;
+      inds[male][4]  = 1.0;
+      inds[male][20] = 1.0;
+    }
   }
 }
 
@@ -301,6 +325,8 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
             offs[off_pos][18] = 0.0;
             offs[off_pos][19] = 0.0;
             offs[off_pos][20] = 0.0;
+            offs[off_pos][21] = 0.0;
+            offs[off_pos][22] = off_trait(inds, mum_row, dad_row, 22, Tm_mu);
             /* Prepare for next offspring */
             off_pos++;
             ID[0]++;
@@ -411,12 +437,13 @@ void build_newN(double **inds, int N, int new_N, double **news, int ind_traits){
 void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
               int off_N, int time_steps, double mim, double mom, double gam, 
               double mov, double a1, double lambd, int xdim, int ydim, int K,
-              double Tm_init, double rg_init, double Tm_mu, double rg_mu){
+              double Tm_init, double rg_init, double Tm_mu, double rg_mu,
+              double N_mu){
 
     int row, col, pid;
     double sex_ratio, time_in, Tm, Tf, Gift, RejPr, count, mcount, fcount;
     double sex_ratio_m, time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m, SS_Tm, SS_Rj;
-    double Vr_Tm, Vr_Rj;
+    double Vr_Tm, Vr_Rj, M_tot, N_tot, M_m, N_m;
     char outfile[17];
 
     FILE *fptr;
@@ -435,6 +462,8 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
           Tf        = 0.0;
           Gift      = 0.0;
           RejPr     = 0.0;
+          M_tot     = 0.0;
+          N_tot     = 0.0;
           count     = 0.0;
           fcount    = 0.0;
           mcount    = 0.0;
@@ -445,6 +474,8 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
               Tf        += inds[row][6];
               Gift      += inds[row][20];
               RejPr     += inds[row][8];
+              M_tot     += inds[row][21];
+              N_tot     += inds[row][22];
               count++;
               if(inds[row][1] == 0){
                   fcount++;
@@ -459,6 +490,8 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
           Tf_m        = Tf        / count;
           Gift_m      = Gift      / mcount;
           RejPr_m     = RejPr     / count;
+          M_m         = M_tot     / count;
+          N_m         = N_tot     / count;
           SS_Tm       = 0.0;
           SS_Rj       = 0.0;
           for(row = 0; row < N; row++){
@@ -468,10 +501,10 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
           Vr_Tm = SS_Tm / (N - 1);
           Vr_Rj = SS_Rj / (N - 1);
           fprintf(fptr, "%f,%f,%f,%f,%f,%f,%d,%d,%d,%f,%f,%f,%f,%d,%f,%f,%f,%f,\
-                         %f,%f,%d,%d,%f,%f\n", mim, mom, gam, mov, a1, lambd,
-                         xdim, ydim, K, Tm_init, rg_init, Tm_mu, rg_mu, ts, 
-                         sex_ratio_m, time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m, 
-                         off_N, N, Vr_Tm, Vr_Rj);
+                         %f,%f,%d,%d,%f,%f,%f,%f\n", mim, mom, gam, mov, a1, 
+                         lambd, xdim, ydim, K, Tm_init, rg_init, Tm_mu, rg_mu, 
+                         ts, sex_ratio_m, time_in_m, Tm_m, Tf_m, Gift_m, 
+                         RejPr_m, off_N, N, Vr_Tm, Vr_Rj, M_m, N_m);
         }
         break;
       case 1:
@@ -481,6 +514,8 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         Tf        = 0.0;
         Gift      = 0.0;
         RejPr     = 0.0;
+        M_tot     = 0.0;
+        N_tot     = 0.0;
         count     = 0.0;
         fcount    = 0.0;
         mcount    = 0.0;
@@ -491,6 +526,8 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
             Tf        += inds[row][6];
             Gift      += inds[row][20];
             RejPr     += inds[row][8];
+            M_tot     += inds[row][21];
+            N_tot     += inds[row][22];
             count++;
             if(inds[row][1] == 0){
                 fcount++;
@@ -505,6 +542,8 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         Tf_m        = Tf        / count;
         Gift_m      = Gift      / mcount;
         RejPr_m     = RejPr     / count;
+        M_m         = M_tot     / count;
+        N_m         = N_tot     / count;
         SS_Tm       = 0.0;
         SS_Rj       = 0.0;
         for(row = 0; row < N; row++){
@@ -513,8 +552,9 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         }
         Vr_Tm = SS_Tm / (N - 1);
         Vr_Rj = SS_Rj / (N - 1);
-        fprintf(fptr, "%d,%f,%f,%f,%f,%f,%f,%d,%d,%f,%f\n", ts, sex_ratio_m, 
-                time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m, off_N, N, Vr_Tm, Vr_Rj);
+        fprintf(fptr, "%d,%f,%f,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f\n", ts, 
+                sex_ratio_m, time_in_m, Tm_m, Tf_m, Gift_m, RejPr_m, off_N, N, 
+                Vr_Tm, Vr_Rj, M_m, N_m);
         break;
       case 2:
         for(row = 0; row < N; row++){
@@ -531,6 +571,10 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         break;
 
     }
+    
+    for(row = 0; row < N; row++){
+      inds[row][21] = 0.0;
+    }
 
     fclose(fptr);
 }
@@ -541,7 +585,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
 void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               double mim, double mom, double gam, double mov, double a1,
               double lambd, int xdim, int ydim, int K, int stats, 
-              double Tm_mu, double rg_mu){
+              double Tm_mu, double rg_mu, double N_mu){
 
     int ts, row, ind_traits, off_N, new_N, *ID, pid;
     double **inds, **offs, **news;
@@ -549,14 +593,14 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
     FILE *fptr;    
 
-    ind_traits = 21;
+    ind_traits = 23;
     
     if(stats == 1){
       pid = getpid();
       sprintf(outfile, "results_%d.csv", pid);
       fptr = fopen(outfile, "a+");
       fprintf(fptr, "Time,Sex_ratio,Time-in,Tm,Tf,Gift,RejPr,Offs,N,Vr_Tm,\
-                     Vr_Rj\n");
+                     Vr_Rj,M_m,N_m\n");
       fclose(fptr);
     }
 
@@ -580,7 +624,8 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
         off_N = count_offspring(inds, N);
 
         sumstats(inds, N, ind_traits, stats, ts, off_N, time_steps, mim, mom,
-                 gam, mov, a1, lambd, xdim, ydim, K, Tm, rejg, Tm_mu, rg_mu);
+                 gam, mov, a1, lambd, xdim, ydim, K, Tm, rejg, Tm_mu, rg_mu,
+                 N_mu);
 
         if(off_N > 0){   
           offs  = (double **) malloc(off_N * sizeof(double));

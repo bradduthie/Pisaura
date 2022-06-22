@@ -15,7 +15,7 @@
 int main(void){
 
     int i, time_steps, N, rep, xdim, ydim, K, stats, pid;
-    double Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, Tm_mu, rg_mu;
+    double Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, Tm_mu, rg_mu, N_mu;
     char outfile[20];
     FILE *fptr; 
 
@@ -24,29 +24,30 @@ int main(void){
     /* =======================================================================*/
     /* Model parameter values                                                 */
     /* =======================================================================*/
-    time_steps = 1000;  /* Simulation time steps                              */
+    time_steps = 40000; /* Simulation time steps                              */
     N          = 1000;  /* Population size                                    */
     Tm         = 0.0;   /* Initial male search time                           */
     Tf         = 2.0;   /* Initial female processing time                     */
     rejg       = 0.0;   /* Initial female rejection probability               */
-    mim        = 0.1;   /* Mortality rate for time-in stage                   */
-    mom        = 0.1;   /* Mortality rate for time-out stage                  */
+    mim        = 0.01;  /* Mortality rate for time-in stage                   */
+    mom        = 0.01;  /* Mortality rate for time-out stage                  */
     gam        = 0.0;   /* Offspring increase for nuptial gift                */
-    mov        = 1.0;   /* Movement parameter                                 */
-    a1         = 0.40;  /* Search time needed to find a gift                  */
-    lambd      = 8.0;   /* Baseline female reproduction                       */
+    mov        = 10.0;  /* Movement parameter                                 */
+    a1         = 0.00;  /* Search time needed to find a gift                  */
+    lambd      = 1.0;   /* Baseline female reproduction                       */
     xdim       = 10;    /* dimension of x-loc landscape                       */
     ydim       = 10;    /* dimension of y-loc landscape                       */
-    K          = 4000;  /* Population carrying capacity                       */
+    K          = 1000;  /* Population carrying capacity                       */
     Tm_mu      = 0.01;  /* Error of offspring Tm from mean parent             */
     rg_mu      = 0.01;  /* Error of offspring rejg from mean parent           */
+    N_mu       = 0.01;  /* Error of the neutral allele fro mean parent        */
     /* =======================================================================*/
 
     /* =======================================================================*/
     /* Simulation details                                                     */
     /* =======================================================================*/
     rep    = 2200; /* Simulations run                                         */
-    stats  = 0;   /* 0: end of time step, 1: each time step, 2: all inds      */
+    stats  = 0;    /* 0: end of time step, 1: each time step, 2: all inds     */
     /* =======================================================================*/
     /*  XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX   */
     /* =======================================================================*/
@@ -60,14 +61,14 @@ int main(void){
       fptr = fopen(outfile, "a+");
       fprintf(fptr, "mim,mom,gam,mov,a1,lambd,xdim,ydim,K,Tm_init,rg_init,\
                      Tm_mu,rg_mu,Time,Sex_ratio,Time-in,Tm,Tf,Gift,RejPr,Offs,\
-                     N,Vr_Tm,Vr_Rj\n");
+                     N,Vr_Tm,Vr_Rj,M_m,N_m\n");
       fclose(fptr);
     }
 
     while(i < rep){
 
         nuptials(time_steps, N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, 
-                 xdim, ydim, K, stats, Tm_mu, rg_mu);
+                 xdim, ydim, K, stats, Tm_mu, rg_mu, N_mu);
                  
         i++;
 
