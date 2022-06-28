@@ -151,11 +151,10 @@ void female_male_int(double **inds, int male, int female){
 /******************************************************************************/
 void female_enter(double **inds, int female){
 
+  inds[female][23]--; 
   if(inds[female][23] < 1){
     inds[female][4]  = 1.0;
     inds[female][24] = 1.0;
-  }else{
-    inds[female][23]--; 
   }
 }
 
