@@ -24,17 +24,17 @@ int main(void){
     /* =======================================================================*/
     /* Model parameter values                                                 */
     /* =======================================================================*/
-    time_steps = 20000; /* Simulation time steps                              */
+    time_steps = 40000; /* Simulation time steps                             */
     N          = 1000;  /* Population size                                    */
     Tm         = 0.0;   /* Initial male search time                           */
-    Tf         = 2.0;   /* Initial female processing time                     */
+    Tf         = 1.0;   /* Initial female processing time                     */
     rejg       = 0.0;   /* Initial female rejection probability               */
     mim        = 0.01;  /* Mortality rate for time-in stage                   */
     mom        = 0.01;  /* Mortality rate for time-out stage                  */
-    gam        = 0.0;   /* Offspring increase for nuptial gift                */
-    mov        = 0.0;   /* Movement parameter                                 */
-    a1         = 0.00;  /* Search time needed to find a gift                  */
-    lambd      = 1.0;   /* Baseline female reproduction                       */
+    gam        = 1.8;   /* Offspring increase for nuptial gift                */
+    mov        = 1.0;   /* Movement parameter                                 */
+    a1         = 0.20;  /* Search time needed to find a gift                  */
+    lambd      = 1.1;   /* Baseline female reproduction                       */
     xdim       = 1;     /* dimension of x-loc landscape                       */
     ydim       = 1;     /* dimension of y-loc landscape                       */
     K          = 1000;  /* Population carrying capacity                       */
@@ -46,8 +46,8 @@ int main(void){
     /* =======================================================================*/
     /* Simulation details                                                     */
     /* =======================================================================*/
-    rep    = 10;  /* Simulations run                                         */
-    stats  = 0;    /* 0: end of time step, 1: each time step, 2: all inds     */
+    rep    = 1;    /* Simulations run                                          */
+    stats  = 1;    /* 0: end of time step, 1: each time step, 2: all inds     */
     /* =======================================================================*/
     /*  XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX   */
     /* =======================================================================*/

@@ -29,7 +29,8 @@ int find_dad(double **inds, int N, double dad_ID);
 double off_trait(double **inds, int mum_row, int dad_row, int trait_col);
 
 void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
-                   int *ID);
+                   int *ID, double Tm_mu, double rg_mu, double N_mu,
+                   int xdim, int ydim);
 
 void apply_K(double **inds, int N, double **offs, int off_N, int K);
 

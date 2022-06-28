@@ -35,33 +35,47 @@ void initialise(int N, double Tm, double Tf, double rejg, double mim,
     int row;
     
     for(row = 0; row < N; row++){
-      inds[row][0]  = (double) row + 1;
-      inds[row][1]  = randbinom(0.5);
-      inds[row][2]  = randunifint(0, xdim - 1);
-      inds[row][3]  = randunifint(0, ydim - 1);
+      inds[row][0]  = (double) row + 1;          /* ID                        */
+      inds[row][1]  = randbinom(0.5);            /* Sex                       */
+      inds[row][2]  = randunifint(0, xdim - 1);  /* xloc                      */
+      inds[row][3]  = randunifint(0, ydim - 1);  /* yloc                      */
       if(inds[row][1] == 0.0){
-          inds[row][4]  = 1.0;
+          inds[row][4]  = 1.0;                   /* Is in mating pool?        */
       }else{
           inds[row][4]  = 0.0;
       }
-      inds[row][5]  = Tm;
-      inds[row][6]  = Tf;
-      inds[row][7]  = 0.0;
-      inds[row][8]  = rejg;
-      inds[row][9]  = mim;
-      inds[row][10] = mom;
-      inds[row][11] = gam;
-      inds[row][12] = mov;
-      inds[row][13] = a1;
-      inds[row][14] = 0.0;
-      inds[row][15] = 0.0;
-      inds[row][16] = 0.0;
-      inds[row][17] = lambd;
-      inds[row][18] = 0.0;
-      inds[row][19] = 0.0;
-      inds[row][20] = 0.0;
-      inds[row][21] = 0.0;
-      inds[row][22] = 0.0;
+      inds[row][5]  = Tm;                        /* Male search time          */
+      inds[row][6]  = Tf;                        /* Female processing time    */
+      inds[row][7]  = 0.0;                       /* Male has nuptial gift?    */
+      inds[row][8]  = rejg;                      /* Female rejection prob     */
+      inds[row][9]  = mim;                       /* Mortality in mating pool  */
+      inds[row][10] = mom;                       /* Mortality out mating pool */
+      inds[row][11] = gam;                       /* Bonus for nuptial gift    */
+      inds[row][12] = mov;                       /* Movement parameter        */
+      inds[row][13] = a1;                        /* Mean search time needed   */
+      inds[row][14] = 0.0;                       /* Offspring number          */
+      inds[row][15] = 0.0;                       /* Mother's row              */
+      inds[row][16] = 0.0;                       /* Father's row              */
+      inds[row][17] = lambd;                     /* Baseline fecundity        */
+      inds[row][18] = 0.0;                       /* Is dead?                  */
+      inds[row][19] = 0.0;                       /* Mate's ID                 */
+      inds[row][20] = 0.0;                       /* Has obtained gift?        */
+      inds[row][21] = 0.0;                       /* Mating encounters         */
+      inds[row][22] = 0.0;                       /* Neutral allele            */
+      if(inds[row][1] == 0){
+        if(Tf > 0){
+          inds[row][23] = (double) randpois(Tf); /* Time steps out            */
+        }else{
+          inds[row][23] = 0.0;
+        }
+      }else{
+        if(Tm > 0){
+          inds[row][23] = (double) randpois(Tm); 
+        }else{
+          inds[row][23] = 0.0;
+        }
+      }
+      inds[row][24] = inds[row][4];              /* Was in the mating pool?   */
     }
 
 }
@@ -113,12 +127,22 @@ void female_male_int(double **inds, int male, int female){
     if(rej_gift < acceptml || inds[male][7] > 0){
       male_add         = inds[male][11] * inds[male][7];
       birth_par        = inds[female][17] + male_add;
-      offspring        = randpois(birth_par);
+      offspring        = (double) randpois(birth_par);
       inds[female][14] = offspring; 
       inds[female][4]  = 0;
       inds[male][4]    = 0;
       inds[male][7]    = 0;
       inds[female][19] = inds[male][0];
+      if(inds[male][5] > 0){
+        inds[male][23]   = (double) randpois(inds[male][5]);
+      }else{
+        inds[male][23]   = 0.0;
+      }
+      if(inds[female][23] > 0){
+        inds[female][23] = (double) randpois(inds[female][6]);
+      }else{
+        inds[female][23] = 0.0;
+      }
     }
 }
 
@@ -127,13 +151,11 @@ void female_male_int(double **inds, int male, int female){
 /******************************************************************************/
 void female_enter(double **inds, int female){
 
-  double iTf, enter_prob, enter_rand;
-
-  iTf        = inds[female][6];
-  enter_prob = exp(-1 * iTf);
-  enter_rand = randunif();
-  if(enter_rand < enter_prob){
-    inds[female][4] = 1.0;
+  if(inds[female][23] < 1){
+    inds[female][4]  = 1.0;
+    inds[female][24] = 1.0;
+  }else{
+    inds[female][23]--; 
   }
 }
 
@@ -142,29 +164,29 @@ void female_enter(double **inds, int female){
 /******************************************************************************/
 void male_search(double **inds, int male){
 
-  int isin;
-  double iTm, a1, enter_prob, enter_rand, gift_prob, gift_rand;
+  double a1, gift_prob, gift_rand;
 
-  isin       = (int) inds[male][4];
-  iTm        = inds[male][5];
-  a1         = inds[male][13];
+  a1 = inds[male][13];
 
-  enter_prob = exp(-1.0 * iTm);
-  enter_rand = randunif();
-  if(enter_rand < enter_prob){
-    inds[male][4] = 1.0;
-  }else{
+  if(inds[male][23] > 0){
     if(a1 == 0){
-        gift_prob = 1;
+      gift_prob = 1;
     }else{
-        gift_prob  = 1 - exp(-1 / a1);
+      gift_prob = 1 - exp(-1 / a1);
     }
     gift_rand  = randunif();
-    if(isin == 0 && gift_rand < gift_prob){
+    if(gift_rand < gift_prob){
       inds[male][7]  = 1.0;
       inds[male][4]  = 1.0;
       inds[male][20] = 1.0;
+      inds[male][23] = 0.0;
+      inds[male][24] = 1.0;
+    }else{
+      inds[male][23]--;
     }
+  }else{
+    inds[male][4]  = 1.0;
+    inds[male][24] = 1.0;
   }
 }
 
@@ -211,13 +233,15 @@ void enter_mating_pool(double **inds, int N){
     int row, isex, iisin; 
     
     for(row = 0; row < N; row++){
-        isex  = (int) inds[row][1];
-        iisin = (int) inds[row][4];
+        
+        inds[row][21] = 0;
+        isex          = (int) inds[row][1];
+        iisin         = (int) inds[row][4];
 
-        if(iisin == 0 && isex == 0){
+        if(iisin < 1 && isex == 0){
            female_enter(inds, row);
         }
-        if(iisin == 0 && isex == 1){
+        if(iisin < 1 && isex == 1){
            male_search(inds, row);
         }
     }
@@ -311,7 +335,8 @@ double off_trait(double **inds, int mum_row, int dad_row, int trait_col,
 /* Add offspring to a new array                                               */
 /******************************************************************************/
 void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
-                   int *ID, double Tm_mu, double rg_mu){
+                   int *ID, double Tm_mu, double rg_mu, double N_mu,
+                   int xdim, int ydim){
 
     int mum_row, dad_row, off_pos, dad_ID;
 
@@ -323,9 +348,13 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
             /* Inserting offspring traits below */
             offs[off_pos][0]  = (double) ID[0];
             offs[off_pos][1]  = randbinom(0.5);
-            offs[off_pos][2]  = inds[mum_row][2];
-            offs[off_pos][3]  = inds[mum_row][3];
-            offs[off_pos][4]  = 0.0;
+            offs[off_pos][2]  = randunifint(0, xdim - 1);
+            offs[off_pos][3]  = randunifint(0, ydim - 1);
+            if(offs[off_pos][1] == 0){
+              offs[off_pos][4]  = 1.0;
+            }else{
+              offs[off_pos][4]  = 0.0;
+            }
             offs[off_pos][5]  = off_trait(inds, mum_row, dad_row, 5, Tm_mu);
             offs[off_pos][6]  = off_trait(inds, mum_row, dad_row, 6, 0.0);
             offs[off_pos][7]  = 0.0;
@@ -343,7 +372,13 @@ void add_offspring(double **inds, int N, double **offs, int off_N, int traits,
             offs[off_pos][19] = 0.0;
             offs[off_pos][20] = 0.0;
             offs[off_pos][21] = 0.0;
-            offs[off_pos][22] = off_trait(inds, mum_row, dad_row, 22, Tm_mu);
+            offs[off_pos][22] = off_trait(inds, mum_row, dad_row, 22, N_mu);
+            if(offs[off_pos][1] == 0 || offs[off_pos][5] <= 0){
+              offs[off_pos][23] = 0.0;
+            }else{
+              offs[off_pos][23] = (double) randpois(offs[off_pos][5]);
+            }
+            offs[off_pos][24] = 0.0;
             /* Prepare for next offspring */
             off_pos++;
             ID[0]++;
@@ -486,7 +521,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
           mcount    = 0.0;
           for(row = 0; row < N; row++){
               sex_ratio += inds[row][1];
-              time_in   += inds[row][4];
+              time_in   += inds[row][24];
               Tm        += inds[row][5];
               Tf        += inds[row][6];
               Gift      += inds[row][20];
@@ -538,7 +573,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         mcount    = 0.0;
         for(row = 0; row < N; row++){
             sex_ratio += inds[row][1];
-            time_in   += inds[row][4];
+            time_in   += inds[row][24];
             Tm        += inds[row][5];
             Tf        += inds[row][6];
             Gift      += inds[row][20];
@@ -591,6 +626,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
     
     for(row = 0; row < N; row++){
       inds[row][21] = 0.0;
+      inds[row][24] = 0.0;
     }
 
     fclose(fptr);
@@ -610,7 +646,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
     FILE *fptr;    
 
-    ind_traits = 23;
+    ind_traits = 25;
     
     if(stats == 1){
       pid = getpid();
@@ -654,7 +690,8 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               offs[row] = (double *) malloc(ind_traits * sizeof(double));
           }
 
-          add_offspring(inds, N, offs, off_N, ind_traits, ID, Tm_mu, rg_mu);
+          add_offspring(inds, N, offs, off_N, ind_traits, ID, Tm_mu, rg_mu, 
+                        N_mu, xdim, ydim);
 
           new_N = count_living(inds, N, offs, off_N);
 
