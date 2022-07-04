@@ -16,6 +16,7 @@ int main(void){
 
     int i, time_steps, N, rep, xdim, ydim, K, stats, pid;
     double Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, Tm_mu, rg_mu, N_mu;
+    double M_per_i;
     char outfile[20];
     FILE *fptr; 
 
@@ -41,6 +42,7 @@ int main(void){
     Tm_mu      = 0.01;  /* Error of offspring Tm from mean parent             */
     rg_mu      = 0.01;  /* Error of offspring rejg from mean parent           */
     N_mu       = 0.01;  /* Error of the neutral allele fro mean parent        */
+    M_per_i    = 2.0;   /* Number of interactions per individual              */
     /* =======================================================================*/
 
     /* =======================================================================*/
@@ -61,14 +63,14 @@ int main(void){
       fptr = fopen(outfile, "a+");
       fprintf(fptr, "mim,mom,gam,mov,a1,lambd,xdim,ydim,K,Tm_init,rg_init,\
                      Tm_mu,rg_mu,Time,Sex_ratio,Time-in,Tm,Tf,Gift,RejPr,Offs,\
-                     N,Vr_Tm,Vr_Rj,M_m,N_m\n");
+                     N,Vr_Tm,Vr_Rj,M_m,N_m,Beta\n");
       fclose(fptr);
     }
 
     while(i < rep){
 
         nuptials(time_steps, N, Tm, Tf, rejg, mim, mom, gam, mov, a1, lambd, 
-                 xdim, ydim, K, stats, Tm_mu, rg_mu, N_mu);
+                 xdim, ydim, K, stats, Tm_mu, rg_mu, N_mu, M_per_i);
                  
         i++;
 

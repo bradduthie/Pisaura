@@ -73,21 +73,3 @@ int randunifint(int min, int max){
 
     return val;
 }
-
-/*  Durstenfeld version of Fisher-Yates shuffle: 
- *  Durstenfeld, R. (1964). Communications of the ACM. 7 (7): 420.
- */
-void rand_int_shuffle(int *a, int N){
-    int i, j, k;
-    
-    for(i = (N - 1); i > 0; i--){
-        j    = randunifint(0, i);
-        k    = a[j];
-        a[j] = a[i];
-        a[i] = k; 
-    }
-}
-
-
-
-
