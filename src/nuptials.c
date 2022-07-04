@@ -68,7 +68,7 @@ void female_process(double **inds, int female){
 
   int time_out;
 
-  time_out = (int) inds[female][6];
+  time_out = (int) randpois(inds[female][6]);
 
   if(time_out > 0){
     inds[female][4]  = 0.0;
@@ -169,8 +169,8 @@ void female_male_int(double **inds, int female, int male){
       male_add         =  inds[male][11] * inds[male][7];
       birth_par        =  inds[female][17] + male_add;
       offspring        =  (double) randpois(birth_par);
-      inds[female][14] += offspring; 
-      inds[male][7]    =  0;
+      inds[female][14] =  offspring; 
+      inds[male][7]    =  0.0;
       inds[female][19] =  inds[male][0];
       male_search(inds, male);
       female_process(inds, female);
@@ -228,12 +228,10 @@ void enter_mating_pool(double **inds, int N){
         
         if(iisin < 1){
             inds[row][23]--; 
-            if(inds[row][23] < 1){
+            if(inds[row][23] < 1.0){
                 inds[row][4]  = 1.0;
                 inds[row][24] = 1.0;
             }
-        }else{
-            inds[row][24] = 1.0;
         }
     }
 }
@@ -642,7 +640,7 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
 void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
               double mim, double mom, double gam, double mov, double a1,
               double lambd, int xdim, int ydim, int K, int stats, 
-              double Tm_mu, double rg_mu, double N_mu, double M_per_ind){
+              double Tm_mu, double rg_mu, double N_mu){
 
     int ts, row, ind_traits, off_N, new_N, *ID, pid;
     double **inds, **offs, **news;
@@ -678,7 +676,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
 
         enter_mating_pool(inds, N);
 
-        get_offspring(inds, N, M_per_ind);
+        get_offspring(inds, N, 2);
 
         mortality(inds, N);
 
