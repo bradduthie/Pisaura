@@ -507,12 +507,14 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
           m_in      = 0.0;
           for(row = 0; row < N; row++){
               sex_ratio += inds[row][1];
-              time_in   += inds[row][24];
+              if(inds[row][24] > 0){
+                M_tot     += inds[row][21];
+                time_in++;
+              }
               Tm        += inds[row][5];
               Tf        += inds[row][6];
               Gift      += inds[row][20];
               RejPr     += inds[row][8];
-              M_tot     += inds[row][21];
               N_tot     += inds[row][22];
               count++;
               if(inds[row][1] == 0){
@@ -568,12 +570,14 @@ void sumstats(double **inds, int N, int ind_traits, int stats, int ts,
         m_in      = 0.0;
         for(row = 0; row < N; row++){
             sex_ratio += inds[row][1];
-            time_in   += inds[row][24];
+            if(inds[row][24] > 0){
+              M_tot     += inds[row][21];
+              time_in++;
+            }
             Tm        += inds[row][5];
             Tf        += inds[row][6];
             Gift      += inds[row][20];
             RejPr     += inds[row][8];
-            M_tot     += inds[row][21];
             N_tot     += inds[row][22];
             count++;
             if(inds[row][1] == 0){
