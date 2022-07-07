@@ -674,7 +674,7 @@ void nuptials(int time_steps, int N, double Tm, double Tf, double rejg,
     ID[0] = N;
     
     ts = 0;
-    while(ts < time_steps){
+    while(ts < time_steps && N > 10){
    
         move_inds(inds, xdim, ydim, N);
 
