@@ -177,7 +177,9 @@ The above equation makes intuitive sense. First note, trivially, that if the int
 
 $$\gamma_{m} > \alpha_{1}\frac{M}{\sqrt{\beta}}.$$
 
-Verbally, the inclusive fitness benefit to offspring provided by the nuptial gift must exceed the search time needed to find a nuptial gift ($\alpha_{1}$) times the male mate encounter rate ($M / \sqrt{\beta}$). Hence, we should expect nuptial gift giving to evolve when the fitness benefit of the nuptial gift to offspring is high relative to the time needed to find a nuptial gift and the encounter rate of females and males in the mating pool. 
+Verbally, the inclusive fitness benefit to offspring provided by the nuptial gift must exceed the search time needed to find a nuptial gift ($\alpha_{1}$) times the male mate encounter rate ($M / \sqrt{\beta}$). Hence, we should expect nuptial gift giving to evolve when the fitness benefit of the nuptial gift to offspring is high relative to the time needed to find a nuptial gift and the encounter rate of females and males in the mating pool. Note that if we want to generalise for some baseline fitness $\lambda$, instead of assuming $\lambda = 1$, then,
+
+$$\gamma_{m} > \lambda\alpha_{1}\frac{M}{\sqrt{\beta}}.$$
 
 An alternative for male gift giving
 -------------------------------------
@@ -229,9 +231,14 @@ $$\gamma_{f} > \frac{e^{\frac{1}{\alpha_{1}}T_{M}}}{T_{F}M\sqrt{\beta}   \left(e
 
 (1 + G) / (F + ((1 / ( (1 - e^(-T/a))  * M * (B^(1/2)))  ))) = ((1 + G)*(1 - e^(-T/a)) + (e^(-T/a)) ) / (F + ((1 / (M * (B^(1/2)))  )))
 
+
+(L + G) / (F + ((1 / ( (1 - e^(-T/a))  * M * (B^(1/2)))  ))) = ((L + G)*(1 - e^(-T/a)) + (e^(-T/a)) ) / (F + ((1 / (M * (B^(1/2)))  )))
+
 --->
 
-Under the above conditions in which the fitness increase caused by the nuptial gift is sufficiently high, females will increase their own fitness by rejecting males that do not have a nuptial gift.
+Under the above conditions in which the fitness increase caused by the nuptial gift is sufficiently high, females will increase their own fitness by rejecting males that do not have a nuptial gift. Note that if we want to generalise for some baseline fitness $\lambda$, instead of assuming $\lambda = 1$, then,
+
+$$\gamma_{f} > 1 - \lambda + \frac{e^{\frac{1}{\alpha_{1}}T_{M}}}{T_{F}M\sqrt{\beta}   \left(e^{\frac{1}{\alpha_{1}}T_{M}} - 1   \right)  }.$$
 
 Operational sex ratio
 ----------------------------
@@ -496,289 +503,184 @@ points(x = TmOpt, y = optMF, pch = 20, col = "black");
 
 
 
-Given $T^{*}_{m} = `r TmOpt`$, we can now calculate $\Pr(G) = `r PrGf(Tm = TmOpt, a1 = 1/16)`$ and $\Pr(L) = `r PrLf(Tm = TmOpt, a1 = 1/16, a2 = Inf)`$. We can then feed these values into the equation for female fitness to determine if females should or should not be choosy.
+Given $T^{*}_{m} = `r TmOpt`$, we can now calculate $\Pr(G) = `r PrGf(Tm = TmOpt, a1 = 1/16)`$ and $\Pr(L) = `r PrLf(Tm = TmOpt, a1 = 1/16, a2 = Inf)`$. We can then feed these values into the equation for female fitness to determine if females should or should not be choosy. **[Note that I had forgotten about this attempt, but we might want to come back to a numerical treatment to complement the IBM?]**
 
 
 
 
-
-
-
-
-
-
-
-
-\clearpage
-
-Introducing fake nuptial gifts
-================================
-
-I think that for simplicity, we need to wait to do this.
-
-Similarly, we define $\alpha_{2}$ to be the amount of time expected to pass before a male encounters a fake nuptial gift. We assume that a male will always prefer a true nuptial gift to a fake nuptial gift ($F$) or no nuptial gift ($N$), so a fake nuptial gift is only obtained when a true one is not. Hence, the probability that a male obtains a fake nuptial gift during a time period of $T_{m}$ is modelled as, 
-
-$$\Pr(F) = \left(1 - e^{-\frac{1}{\alpha_{2}}T_{m}}\right)e^{-\frac{1}{\alpha_{1}}T_{m}}.$$
-$$\Pr(L) = e^{-T_{m}\left(\frac{1}{\alpha_{1}} + \frac{1}{\alpha_{2}}\right)}.$$
-
-\clearpage
-
-
-
-Notes and old text
+Individual-based model
 ==============================
 
-<!--- 
-
-Derivative of W with respect to T
-
 ```{r, echo = FALSE}
-TMvals   <- seq(from = 0.00001, to = 1, by = 0.00001);
-dmalefit <- Wp(M = 1, beta = 1, a1 = 1/16, gamma = 1/2, Tm = TMvals);
-par(mar = c(5, 5, 1, 1));
-plot(x = TMvals, y = dmalefit, type = "l", lwd = 2, cex.lab = 1.25,
-     xlab = expression(paste("Time out for males (", T[m], ")")),
-     ylab = expression(paste(partialdiff,"W"[m],"/",partialdiff,"T"[m])));
-abline(h = 0, lty = "dotted", lwd = 0.8);
-mxfit <- which(malefit == max(malefit));
-optTm <- TMvals[mxfit];
-points(x = optTm, y = dmalefit[mxfit], pch = 20);
+male_evolve <- read.csv("results/sim_males_evolving.csv");
 ```
 
---->
+I have written an individual-based model that replicates the mathematical model above as closely as possible. This was time-consuming, and during the process I learned a lot about some subtleties of the assumptions that are being made. I will write up a full model description later, but for now, the simulation proceeds over multiple time steps. In each time step, a some number of interactions between randomly selected individuals in the mating pool occurs, and if one individual is male and the other is female, then there is the potential for mating. Females will always accepted males with gifts, but might reject males without gifts with some probability $R$. Whenever a male leaves the mating pool, he will search some number of time steps determined by poisson sampling with a rate parameter of $T_{M}$ (note, if this is zero, he can return to mate in the same time step), and may or may not get a nuptial gift. Whenever a female leaves the mating pool, the time she takes to process offspring is also determined by poisson sampling with a rate parameter of $T_{F}$ (again, if this is zero, she can return to the mating pool in the same time step). Standard techniques are used to keep the population at a carrying capacity.
 
-**I am just leaving this in here for now**. Second derivative of fitness with respect to search time,
+A lot of my time has been spent trying to get the individual-based modelling results to match predictions of Figures 1 and 2 above. There were many times when the pattern was off and I realised that the IBM was not quite right. The most substantial and final error that I realised was that Figures 1 and 2 are not quite accurate for the long-term evolution predictions for several reasons. 
 
-$$\frac{\partial^2 W_{m}}{\partial T_{m}^2} = \frac{\frac{2\left(1 + \gamma\left(1 - \frac{1 + \frac{\frac{\sqrt{\beta}}{M} + T_{m}}{\alpha_{1}}}{e^{\frac{1}{\alpha_{1}}T_{m}}}\right)\right)}{\left(T_{m} + \frac{\sqrt{\beta}}{M}\right)^{2}} - \frac{\gamma}{\alpha_{1}^{2}e^{\frac{1}{\alpha_{1}}T_{m}}}}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
-<!---
+First, the line above which male searching should evolve ($T_{M} > 0$; zones B and D) reflects the *initial* evolution of male searching given no female choice (i.e., $R = 0$). If a bit of female choice has evolved, either due to selection or drift, then there is an additional selection pressure for males to search. Hence, the correct baseline for the IBM is a simulation in which female choice is not evolving, and all males are accepted as mates upon encounter. 
 
-
-0 = ((((2 * (1 + (G*(1 - ((1 + ((((B^(1/2))/M) + T) / a))/e^(T/a))))))) / ((T + ((B^(1/2))/M))^2)) - (G / (a^2 * (e^(T/a)))) ) / (T + (B^(1/2) / M)) 
-
---->
-
-
-Old stuff
-==============================
-
-
-
-
-
-
-
-The plot below shows $\partial W_{m} / \partial T_{m}$ across a range of inclusive fitness increments to offspring associated with a nuptial gift ($\gamma$). Given a sufficiently high value of $\gamma$, males will increase their fitness by increasing their search time, evaluated at $T_{M} = 0$.
+Second, the equations predicting the interaction rates are a bit inaccurate for the IBM. Recall that $M$ is the rate at which "an individual meets receptive mates" in a population of unbiased operational sex ratio [@Kokko2001]. Since $\beta$ represents the ratio of males to females (e.g., $\beta = 2$ means that there are twice as many males in the mating pool), we assume that males encounter females at a rate of $M / \sqrt{\beta}$ and females encounter males at a rate of $M \sqrt{\beta}$ [@Kokko2001]. To try to align the mathematical model and IBM as closely as possible, I was calculating an $M$ and $\beta$ from the simulations, but it is much more accurate to calculate the rate at which an average male in the mating pool meets a receptive female ($M_{male}$) and the rate at which an average female in the mating pool meets a receptive male ($M_{female}$). Because of the discrete nature of time steps (i.e., some individuals leave the mating pool mid time step), it is not always true that $M_{male} = M / \sqrt{\beta}$ or $M_{female} = M \sqrt{\beta}$, and this was causing small errors in the predictions for the evolution of searching. Below shows a plot of $M_{male}$ derived directly from the simulation versus calculated from simulation values of $M$ and $\beta$.
 
 ```{r, echo = FALSE}
-gavals  <- seq(from = 0.001, to = 2, by = 0.001);
-malefit <- dWdT(gamma = gavals, Tm = 0, beta = 1, M = 1, a1 = 0.1);
-par(mar = c(5, 5, 1, 1));
-plot(x = gavals, y = malefit, type = "l", lwd = 2, cex.lab = 0.9,
-     xlab = expression(paste("Inclusive fitness increment with gift (", gamma, ")")),
-     ylab = expression(paste("Male fitness change with search time (",partialdiff,"W"[M],"/",partialdiff,"T"[M],")")));
-abline(h = 0, lty = "dotted", lwd = 0.8);
+Mm_directly   <- male_evolve$M_males;
+Mm_calculated <- male_evolve$M_m / (sqrt(male_evolve$Beta));
+plot(x = Mm_directly, y = Mm_calculated, pch = 20);
+abline(a = 0, b = 1, col = "red", lwd = 2);
 ```
 
-<!---
-
-Double checking:
+The red line shows a slope of 1 passing through the origin; if the IBM worked in perfect harmony with the maths, then all points should hit the line. We have the same story with $M_{female}$.
 
 ```{r, echo = FALSE}
-gavals  <- seq(from = 0.001, to = 2, by = 0.001);
-malefit <- dWdT_check(gamma = gavals, beta = 1, M = 1, a1 = 1);
-par(mar = c(5, 5, 1, 1));
-plot(x = gavals, y = malefit, type = "l", lwd = 2, cex.lab = 0.9,
-     xlab = expression(paste("Inclusive fitness increment with gift (", gamma, ")")),
-     ylab = expression(paste("Male fitness change with search time (",partialdiff,"W"[M],"/",partialdiff,"T"[M],")")));
-abline(h = 0, lty = "dotted", lwd = 0.8);
+Mf_directly   <- male_evolve$M_females;
+Mf_calculated <- male_evolve$M_m * (sqrt(male_evolve$Beta));
+plot(x = Mf_directly, y = Mf_calculated, pch = 20);
+abline(a = 0, b = 1, col = "red", lwd = 2);
 ```
 
---->
+In short, the interaction rates calculated from $M$ and $\beta$ tend to overestimate the actual interaction rate for males and underestimate the interaction rate for females. The solution is therefore to just use $M_{male}$ and $M_{female}$ estimates directly from the IBM. Predicted threshold for evolution of searching is then simply,
 
+$$\gamma_{m} > \lambda \alpha_{1} M_{males}$$
 
-Again, this makes intuitive sense because unless $\gamma > 0$, fitness can not increase with increased search time. So for our hypothetical example, if $\gamma = 1/2$, then we have `r dWdT(gamma = 1/2, Tm = 1, beta = 1, M = 100, a1 = 1)`.
+We can find this with a simple R function, where `Male_M` is $M_{males}$.
 
-For females, we can plot $W_{f}(n)/T_{F}$ and $Pr(g) (W_{f}(g) / (T_{F} + T_{N})$ as a function of $\gamma$.
-
-```{r, echo = FALSE}
-Wfn <- function(TF = 1){
-  return(0.5/TF);
-}
-WFG <- function(gamma, a1 = 1, a2 = 2, Tf = 1, TN = 1, M = 100, beta = 1, Tm){
-  PrG <- 1 - exp(-(1/a1)*Tm);
-  PrF <- (1 - exp(-(1/a2)*Tm))*exp(-(1/a1)*Tm);
-  Wfg <- 0.5 * (1 + gamma * (PrG / (PrG + PrF)));
-  prg <- 1 - exp(-TN * (M / sqrt(beta)) * (PrG + PrF));
-  val <- prg * (Wfg / (Tf + TN));
-  return(val);
+```{r}
+male_IBM_criteria <- function(Male_M, alpha = 1, lambda = 1){
+  return(lambda * alpha * Male_M);
 }
 ```
 
-```{r, echo = FALSE}
-gavals  <- seq(from = 0.001, to = 2, by = 0.001);
-fmleL   <- rep(Wfn(TF = 1), times = length(gavals));
-fmleG   <- WFG(gamma = gavals, Tm = 1, TN = 0.25)
-plot(x = gavals, y = fmleG, type = "l", lwd = 2, cex.lab = 1, 
-     ylim = c(0, 1.2),
-     xlab = expression(paste("Offspring fitness increment with gift (", gamma, ")")),
-     ylab = expression(paste("Female fitness (", W[f], ")")))
-points(x = gavals, y = fmleL, type = "l", lwd = 2, col = "red");
-abline(h = 0, lty = "dotted", lwd = 0.8);
-```
+For females, the predicted threshold for rejecting a male that does not have a gift is then,
 
-Here the intersection of the black and red lines identifies the inclusive fitness increment for offspring $\gamma$ at which females do not benefit anymore from accepting a giftless male versus rejecting the giftless male in search of a new one. Where the black line is higher, females benefit by rejecting the giftless male in favour of searching for a new male. Where the red line is higher, females benefit by mating with the giftless male and entering the time out stage.
+$$\gamma_{f} > 1 - \lambda + \frac{e^{\frac{1}{\alpha_{1}}T_{M}}}{T_{F} M_{females}   \left(e^{\frac{1}{\alpha_{1}}T_{M}} - 1   \right)  }.$$
 
-<!--- Set the inequalities to solve for gamma
+We can find this with another R function, where `Fem_M` is $M_{females}$.
 
-Prg * (Wfg / (TF + TN)) > WFn / TF
-
-Prg = (1 - e^(-N (M * (B^(1/2)) (PrG + PrF))))
-Wfg = (1/2 * (1 + (gamma * (PrG) / (PrG + PrF))))
-Wfn = (1/2)
-PrG = (1 - e^(-(T/a)))
-PrF = ((1 - e^(-(T/b))) * e^(-(T/a)))
-
-(1 - e^(-N (M * (B^(1/2)) ((1 - e^(-(T/a))) + ((1 - e^(-(T/b))) * e^(-(T/a))))))) * ((1/2 * (1 + (gamma * ((1 - e^(-(T/a)))) / ((1 - e^(-(T/a))) + ((1 - e^(-(T/b))) * e^(-(T/a))))))) / (F + N)) = (1/2) / (F)
-
---->
-
-
-
-```{r, echo = FALSE}
-gamma_star <- function(TN, M, beta, TF, a1, a2, TM){
-  top1 <- exp(-(TM/a1)) * exp(-(TM/a2)) - 1;
-  top2 <- exp(-(TM*(a2 + a1))/(a1*a2)) * TF + TN;
-  bot1 <- TF;
-  bot2 <- exp(-(TM*(a2 + a1))/(a1*a2)) - 1;
-  bot3 <- exp(-(TM/a1)) - 1;
-  topp <- top1 * top2;
-  bott <- bot1 * bot2 * bot3;
-  gst  <- -1*topp/bott;
-  return(gst);
+```{r}
+female_IBM_criteria <- function(Fem_M, TM = 1, alpha = 1, lambda = 1, TF = 2){
+  topp <- exp(TM / alpha);
+  bott <- TF * Fem_M * (exp(TM/alpha) - 1);
+  gamF <- 1 - lambda + (topp / bott);
+  return(gamF);
 }
 ```
 
-```{r, echo = FALSE}
-ts <- seq(from = 0, to = 4, by = 0.001);
-yy <- gamma_star(TN = ts, M = 100, beta = 1, TF = 1, a1 = 1, a2 = 2, TM = 1);
-par(mar = c(5, 5, 1, 1));
-plot(x = ts, y = yy, type = "l", lwd = 2, cex.lab = 1, ylim = c(0, 8),
-     xlab = expression(paste("Female additional search time (", "T"[N], ")")),
-     ylab = expression(paste("Gain needed for fitness increase (", gamma, "*)")));
-abline(h = 0, lty = "dotted", lwd = 0.8);
-```
+Once some of these issues were ironed out, I ran a simulation with the following parameter values.
 
-Upon rejecting a focal male, females will search for a new male for a duration of time $T_{N}$. The above plot illustrates how much of an fitness benefit provided to offspring ($\gamma$) is needed for the focal female to justify the new search duration ($\gamma^{*}$) given $T_{F} = 1$ and $T_{M} = 1$. Note that upon rejecting a focal male, there is a nonzero probability that the focal female will fail to find a new male entirely after $T_{N}$, so there is no reason to expect the line above to pass through the origin. The value of $\gamma^{*}$ when $T_{N} = 0$ is $\gamma^{*} =$ `r yy[1]`. As a focal female invests more time, a larger fitness increment to her offspring is needed for rejecting the focal male to be beneficial.
+| Parameter     | Value   | Description                                        |
+|---------------|---------|----------------------------------------------------|
+| $T_{m}$       | 0       | Evolving male search time                          |
+| $T_{f}$       | 2       | Female processing time                             |
+| $R$           | 0       | Female rejection rate                              |
+| $\mu_{if}$    | 0.01    | Female mortality in mating pool                    |
+| $\mu_{of}$    | 0.01    | Female mortality outside mating pool               |
+| $\mu_{im}$    | 0.01    | Male mortality in mating pool                      |
+| $\mu_{om}$    | 0.01    | Male mortality outside mating pool                 |
+| $\lambda$     | 1       | Baseline female reproduction                       |
+| $K$           | 1000    | Population carrying capacity                       |
+| $\mu^{T_{m}}$ | 0.01    | Parent-offspring error of $T_{m}$                  |
+| $\mu^{R}$     | 0.00    | Parent-offspring error of $R$                      |
+| $t_{max}$     | 40000   | Total time steps                                   |
 
-Below, we show how male search time affects $\gamma^{*}$ when $T_{N} = 1$ and $T_{M} = 1$.
-
-```{r, echo = FALSE}
-ts <- seq(from = 0.001, to = 4, by = 0.001);
-yy <- gamma_star(TN = 1, M = 100, beta = 1, TF = 1, a1 = 1, a2 = 2, TM = ts);
-plot(x = ts, y = yy, type = "l", lwd = 2, cex.lab = 1, ylim = c(0, 8),
-     xlab = expression(paste("Male search time (", "T"[M], ")")),
-     ylab = expression(paste("Gain needed for fitness increase (", gamma, "*)")));
-abline(h = 0, lty = "dotted", lwd = 0.8);
-```
-
-
-
-Old calculations
-------------------------
-
-We select some values $\alpha_{1} = 1$ and $\alpha_{2} = 2$. From here, we can initially assume $\gamma = 0$ and plot how $W_{m}$ changes as a function of $T_{M}$.
-
-If we set $T_{F} = 1$, then simulate a range of $T_{M} = \{0.001, 0.002, 1.999, 2.000 \}$, we can calculate $W_{M}$.
+I ran the above parameter values across a range of $\gamma$ and $\alpha_{1}$ combinations, with each combination of $\gamma$ and $\alpha_{1}$ getting 20 replicates. From the calculated $M_{females}$ and $M_{males}$, Figure 3 below builds the zones of Figures 1 and 2.
 
 ```{r, echo = FALSE}
-TMvals  <- seq(from = 0.001, to = 2, by = 0.001);
-malefit <- W_m(mom = 1, mim = 1, mof = 1, mif = 1, M = 100, TF = 1, gamma = 0,
-               a1 = 1, a2 = 2, beta = 1, TM = TMvals);
-par(mar = c(5, 5, 1, 1));
-plot(x = TMvals, y = malefit, type = "l", lwd = 2, cex.lab = 1.25,
-     ylim = c(0, 3),
-     xlab = expression(paste("Time out for males (", T[m], ")")),
-     ylab = expression(paste("Male fitness (", W[m], ")")));
-abline(h = 0, lty = "dotted", lwd = 0.8);
+simpleboot <- function(freqs, repli = 1000, alpha = 0.05){  
+  vals  <- NULL;                             
+  i     <- 0;                                    
+  while(i < repli){                             
+    boot  <- sample(x = freqs, size = length(freqs), replace = TRUE);     
+    strap <- mean(boot);                      
+    vals  <- c(vals,strap);                     
+    i     <- i + 1;                          
+  }                                           
+  vals   <- sort(x = vals, decreasing = FALSE);    
+  lowCI  <- vals[round( (alpha * 0.5) * repli )];    
+  highCI <- vals[round( (1-(alpha*0.5) ) * repli)];     
+  CIs    <- c(lowCI, highCI);        
+  return(CIs);         
+}
+
+res <- unique(cbind(male_evolve$a1, male_evolve$gam));
+
+SUMM <- NULL;
+for(i in 1:dim(res)[1]){
+  a1_val  <- res[i, 1];
+  gam_val <- res[i, 2];
+  temp_r  <- which(male_evolve$a1 == a1_val & male_evolve$gam == gam_val);
+  mean_Tm <- mean(male_evolve[temp_r,]$Tm);
+  CIs_Tm  <- simpleboot(freqs = male_evolve[temp_r,]$Tm);
+  mean_Rj <- mean(male_evolve[temp_r,]$RejPr);
+  CIs_Rj  <- simpleboot(freqs = male_evolve[temp_r,]$RejPr);
+  mean_Gf <- mean(male_evolve[temp_r,]$Gift);
+  mean_Nu <- mean(male_evolve[temp_r,]$N_m);
+  CIs_Nu  <- simpleboot(freqs = male_evolve[temp_r,]$N_m);
+  mean_M  <- mean(male_evolve[temp_r,]$M_m);
+  mean_B  <- mean(male_evolve[temp_r,]$Beta);
+  mean_Mm <- mean(male_evolve[temp_r,]$M_males);
+  mean_Fm <- mean(male_evolve[temp_r,]$M_females);
+  
+  new_row <- c(a1_val, gam_val, mean_Tm, CIs_Tm, mean_Rj, CIs_Rj, mean_Gf,
+               mean_Nu, CIs_Nu, mean_M, mean_B, mean_Mm, mean_Fm);
+  SUMM    <- rbind(SUMM, new_row);
+}
+
+colnames(SUMM) <- c("a1_val", "gam_val", "mean_TM", "LCI_Tm", "UCI_Tm",
+                    "mean_Rj", "LCI_Rj", "UCI_Rj", "Gift", "Neutral",
+                    "LCI_Neutral", "UCI_Neutral", "M", "Beta", "M_m", "F_m");
+
+alpha_vals    <- seq(from = 0, to = 2.8, by = 0.2);
+alpha_vals[1] <- 0.0001;
+
+TM_vals      <- tapply(X = SUMM[,3],  INDEX = SUMM[,1], FUN = mean);
+m_vals       <- tapply(X = SUMM[,13], INDEX = SUMM[,1], FUN = mean);
+beta_vals    <- tapply(X = SUMM[,14], INDEX = SUMM[,1], FUN = mean);
+Male_M       <- tapply(X = SUMM[,15], INDEX = SUMM[,1], FUN = mean);
+Female_M     <- tapply(X = SUMM[,16], INDEX = SUMM[,1], FUN = mean);
+
+g_m <- male_IBM_criteria(Male_M = Male_M, alpha = alpha_vals, lambda = 1);
+g_f <- female_IBM_criteria(Fem_M = Female_M, TM = alpha_vals, 
+                           alpha = alpha_vals, lambda = 1, TF = 2);
+
+par(mar = c(5, 5, 1, 1)); 
+plot(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25,
+     xlab = expression(paste("Nuptial gift search time (", alpha[1], ")")),
+     ylab = expression(paste("Fitness threshold (", gamma, ")")),
+     ylim = c(0, 2));
+points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25,
+       col = "black", lty = "solid");
+g_v <- which(g_f > g_m);
+g_w <- which(g_f <= g_m);
+polygon(x = c(alpha_vals[g_v], rev(alpha_vals[g_v])), 
+        y = c(g_m[g_v], rev(g_f[g_v])),
+        border = NA, col = "grey70");
+polygon(x = c(alpha_vals[g_w], rev(alpha_vals[g_w])), 
+        y = c(g_m[g_w], rev(g_f[g_w])),
+        border = NA, col = "grey20");
+bott <- rep(0, times = length(alpha_vals));
+topp <- c(g_m[g_v], g_f[g_w]);
+polygon(x = c(alpha_vals, rev(alpha_vals)), 
+        y = c(topp, rev(bott)),
+        border = NA, col = "grey90");
+points(x = alpha_vals, y = g_m, type = "l", lwd = 2, cex.lab = 1.25);
+points(x = alpha_vals, y = g_f, type = "l", lwd = 2, cex.lab = 1.25);
+for(i in 1:dim(SUMM)[1]){
+  if(SUMM[i, 4] > 0 & SUMM[i, 5] > 0){
+    points(x = SUMM[i, 1], y = SUMM[i, 2], cex = 1.5, col = "red", pch = 20);
+  }
+}
+text(x = 0.15, y = 1.85, cex = 4, labels = "A");
+text(x = 0.10, y = 0.4, cex = 2, labels = "B");
+text(x = 2.55, y = 1.2, cex = 3, labels = "C", col = "white");
+text(x = 2.55, y = 0.4, cex = 4, labels = "D");
 ```
 
-Note, however, that this is absolute fitness for a particular period of time out for males. What we are really interested in the change in male fitness given a change in time out. To do this, we can differentiate $W_{m}$ with respect to $T_{m}$ and simplify,
+The focus here is on the line with the highest slope, separating regions A and B from C and D (the horizontal line might need to be recalculated, more on this later). This is the line that determines whether searching should (above the line, zones A and B) or should not (below the line, zones C and D) evolve. The red points show areas of the parameter space in which searching has evolved in the IBM, as defined by the lower 95 percent confidence interval of the final $T_{m}$ being greater than zero. Aside for a small handful of points, the model appears quite accurate, and more replicates should improve the accuracy. 
 
+Overall, these simulation results are highly encouraging, and my only regret is that it took so long to get them working. The next step is to look at things from the female perspective by fixing $T_{m} = \alpha_{1}$ for all males and letting female rejection rate evolve. We would then predict to see female rejection evolve for zones A and C, but not B and D. 
 
-Testing
------------------
-
-In the text, I am presenting the below,
-
-$$\frac{\partial W_{m}}{\partial T_{m}} = \frac{\gamma \left(\frac{\left(\frac{\left(T_{M} + \frac{\sqrt{\beta}}{M} \right)}{\alpha_{1}} + 1 \right)}{e^{\frac{1}{\alpha_{1}}T_{M}}} - 1 \right) - 1}{\left(T_{M} + \frac{\sqrt{\beta}}{M} \right)^{2}}.$$
-
-This can be simplified,
-
-$$\frac{\partial W_{m}}{\partial T_{m}} = \frac{\frac{\gamma \left( M^{2} + \frac{M^{2}T_{m} + M\sqrt{\beta}}{\alpha_{1}} \right)}{e^{\frac{1}{\alpha_{1}}T_{M}}} - M^{2}\left(1 + \gamma \right)}{\left(T_{m}M + \sqrt{\beta}\right)^{2}}.$$
-
-But I do not really like this simplification. To me, it is easier to understand a bit of the biology with the first equation.
-
-<!---
-
-N = (G * (  ( ( ( (T + ((B^(1/2))/M)) / a ) + 1) / (e^(T/a)) ) - 1 ) ) - 1
-
-
-N = (G * (  ( ( ( (0 + ((B^(1/2))/M)) / a ) + 1) / (e^(0/a)) ) - 1 ) ) - 1
-
-
-N = ((G * (  ( ( ( (0 + ((B^(1/2))/M)) / a ) + 1) / (e^(0/a)) ) - 1 ) ) - 1) / (((B^(1/2))/M)^2)
-
-
---->
-
-
-Stop searching when found
-===============================
-
-**This is all wrong because of a mistake with Pr(G)**. I don't think that this is worth it unless absolutely necessary.
-
-<!---
-
-W = (( (1 - e^(-(T/a))) * (G + 1) ) + ( (1 - (e^(-T/b)) ) * (e^(-T/a)) ) + ( e^(-T*((1/a) + (1/b))) ))  /   (a + ((B^(1/2))/M))
-
---->
-
-This was the original fitness equation,
-
-$$W_{m} = \frac{\Pr(G)(1 + \gamma) + \Pr(F) + \Pr(L)}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
-
-But here is the fitness equation if males stop searching once they have found something, and I am getting rid of the fake nuptial gift now just to keep things tractable (assume $\alpha_{2} \to \infty$),
-
-$$W_{m} = \frac{\Pr(G)(1 + \gamma)}{\alpha_{1} + \frac{\sqrt{\beta}}{M}} + \frac{\Pr(L)}{T_{m} + \frac{\sqrt{\beta}}{M}}.$$
-
-<!---
-
-W = (( (1 - e^(-(T/a))) * (G + 1) ) / (a + ((B^(1/2))/M))) + (( (1 - (e^(-T/b)) ) * (e^(-T/a)) ) / (b + ((B^(1/2))/M))) + (( e^(-T*((1/a) + (1/b))) ) / (T + ((B^(1/2))/M))) 
-
-
-W = (( (1 - e^(-(T/a))) * (G + 1) ) / (a + ((B^(1/2))/M)))  + (( e^(-T*((1/a))) ) / (T + ((B^(1/2))/M))) 
-
---->
-
-Now,
-
-$$\frac{\partial W_{m}}{\partial T_{m}} = \frac{\frac{\gamma + 1}{\alpha_{1}^{2} + \frac{\alpha_{1}\sqrt{\beta}}{M}}  -  \frac{ \frac{T + \frac{\sqrt{\beta}}{M}}{a} + 1}{\left( T_{m} + \frac{\sqrt{\beta}}{M} \right)^{2}}}{e^{\frac{1}{\alpha_{1}}T_{m}}}.$$
-<!---
-
-D = ((G + 1) / (a^2 + (a*(B^(1/2))/M))) - ((( (((B^(1/2))/M)) / a) + 1) / (((B^(1/2)/M)^2)))
-
-0 = ((G + 1) / (a^2 + (a*(B^(1/2))/M))) - ((( (((B^(1/2))/M)) / a) + 1) / (((B^(1/2)/M)^2)))
-
-
-0 = ((G + 1) / (a^2 + (a*(1^(1/2))/M))) - ((( (((1^(1/2))/M)) / a) + 1) / (((1^(1/2)/M)^2)))
-
-
---->
-
-From here, we end up with,
-
-$$\gamma > \frac{\left(M\alpha_{1}\right)^{2}}{\beta} - \frac{2M\alpha_{1}}{\sqrt{\beta}}.$$
-
+The natural final step is to then run everything with both male searching and female rejection evolving simultaneously. It might be good to flesh out the predictions from the numerical model first, but I might just be getting a bit too pedantic here?
 
 
 References
